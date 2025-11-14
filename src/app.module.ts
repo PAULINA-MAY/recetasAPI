@@ -4,10 +4,9 @@ import { AppService } from './app.service';
 import { RolesModule } from './roles/roles.module';
 
 
-
 @Module({
-  imports: [RolesModule],
-  controllers: [AppController],
+controllers: [AppController],
   providers: [AppService],
+  imports: [RolesModule],
 })
 export class AppModule {}

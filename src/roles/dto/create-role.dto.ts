@@ -7,3 +7,5 @@ export class CreateRoleDto {
   @Length(1, 150)
   tipo: string;
 }
+
+

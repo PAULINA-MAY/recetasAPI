@@ -80,7 +80,7 @@ model RecetaIngrediente {
 
 model Rol {
   rolId           Int       @id(map: "PK__Rol__5402363404DC0F4D") @default(autoincrement())
-  tipo            String    @db.VarChar(150)
+  tipo            String    @unique @db.VarChar(150)
   fechaDeCreacion DateTime? @default(now(), map: "DF__Rol__fechaDeCrea__49C3F6B7") @db.DateTime
   Usuario         Usuario[]
 }

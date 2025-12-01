@@ -78,7 +78,8 @@ CREATE TABLE [dbo].[Rol] (
     [rolId] INT NOT NULL IDENTITY(1,1),
     [tipo] VARCHAR(150) NOT NULL,
     [fechaDeCreacion] DATETIME CONSTRAINT [DF__Rol__fechaDeCrea__49C3F6B7] DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT [PK__Rol__5402363404DC0F4D] PRIMARY KEY CLUSTERED ([rolId])
+    CONSTRAINT [PK__Rol__5402363404DC0F4D] PRIMARY KEY CLUSTERED ([rolId]),
+    CONSTRAINT [Rol_tipo_key] UNIQUE NONCLUSTERED ([tipo])
 );
 
 -- CreateTable
@@ -89,7 +90,8 @@ CREATE TABLE [dbo].[Usuario] (
     [correo] VARCHAR(255) NOT NULL,
     [contraseña] VARCHAR(255) NOT NULL,
     [fechaDeCreacion] DATETIME CONSTRAINT [DF__Usuario__fechaDe__4CA06362] DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT [PK__Usuario__A5B1AB8E7D9176BF] PRIMARY KEY CLUSTERED ([usuarioId])
+    CONSTRAINT [PK__Usuario__A5B1AB8E7D9176BF] PRIMARY KEY CLUSTERED ([usuarioId]),
+    CONSTRAINT [Usuario_nombreCompleto_key] UNIQUE NONCLUSTERED ([nombreCompleto])
 );
 
 -- AddForeignKey

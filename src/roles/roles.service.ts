@@ -14,6 +14,14 @@ export class RolesService{
        }
     }
 
+    async getRolesById(id:number):Promise<RolModel[]>{
+      try {
+        return this.prisma.rol.findMany({ where: { rolId: id } });
+      } catch (err) {
+        throw err;
+      }
+    }
+
     async createRole(tipo: string): Promise<RolModel> {
     try {
          return this.prisma.rol.create({ data: { tipo } });
@@ -32,7 +40,16 @@ export class RolesService{
         throw err;
       }
     }
+   
 
+    async deleteRole(id:number):Promise<RolModel>{
+      try {
+        return this.prisma.rol.delete({ where: { rolId: id } });
+      } catch (err) {
+        throw err;
+      }
+
+    }
 
 
 

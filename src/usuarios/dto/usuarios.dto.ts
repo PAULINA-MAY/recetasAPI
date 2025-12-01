@@ -21,6 +21,6 @@ export class UsuariosDto {
 
   @ApiProperty({ example: 'MiPassword123' })
   @IsString()
-  @Length(1, 255)
+@Length(1, 8)
   contrase_a: string;
 }

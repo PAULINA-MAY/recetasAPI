@@ -1,4 +1,4 @@
-import { Get, Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, Get, Injectable, NotFoundException } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 import { UsuarioModel } from "generated/prisma/models";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -30,10 +30,9 @@ export class UsuariosService{
                         const user = await this.prisma.usuario.findUnique({
               where: { nombreCompleto: data.nombreCompleto }
             })
-            if (!user) {
-              throw new NotFoundException('Usuario no encontrado')
+            if (user) {
+             throw new ConflictException('El usuario ya existe');
             }
-            
                return await this.prisma.usuario.create({
                 data: {
                     rolIdFK: data.rolIdFK,

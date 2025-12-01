@@ -2,22 +2,18 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsInt, IsString, Length } from 'class-validator';
 
 export class CreateUsuariosDto {
- @ApiProperty({ example: 1 })
-  @IsInt()
-  rolIdFK: number;
-
-  @ApiProperty({ example: 'Juan Pérez' })
+@ApiProperty({ example: 'Paulina May' })
   @IsString()
   @Length(1, 150)
   nombreCompleto: string;
 
-  @ApiProperty({ example: 'juan.perez@example.com' })
+  @ApiProperty({ example: 'paulina.may@example.com' })
   @IsEmail()
   correo: string;
 
-  @ApiProperty({ example: 'MiPassword123' })
+  @ApiProperty({ example: 'MiPassword' })
   @IsString()
-  @Length(1, 255)
+  @Length(1, 8)
   contrase_a: string;
 }
 

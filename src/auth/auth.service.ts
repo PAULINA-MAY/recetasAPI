@@ -6,7 +6,7 @@ import { LoginDto } from "./dto/loginDto.auth";
 import * as bcrypt from 'bcrypt';
 import { CreateUsuariosDto } from "src/usuarios/dto/create-usuario.dto";
 import { UsuariosDto } from "src/usuarios/dto/usuarios.dto";
-import { create } from "domain";
+
 
 @Injectable()
 export class authService {
@@ -37,7 +37,7 @@ export class authService {
   token: this.jwtService.sign({
     usuarioId: usuario.usuarioId,
     nombreCompleto: usuario.nombreCompleto,
-    correo: usuario.correo,
+    correo: usuario.correo
   })
 }
 

@@ -4,11 +4,17 @@ import { AppService } from './app.service';
 import { RolesModule } from './roles/roles.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { AuthModule } from './auth/auth.module';
-
+import { ConfigModule } from '@nestjs/config'; 
+import config from './config/configuration.config';
 
 @Module({
-controllers: [AppController],
+  controllers: [AppController],
   providers: [AppService],
-  imports: [RolesModule,UsuariosModule, AuthModule ],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true ,load: [config], envFilePath: '.env', }), 
+    RolesModule,
+    UsuariosModule,
+    AuthModule,
+  ],
 })
 export class AppModule {}

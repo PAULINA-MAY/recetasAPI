@@ -18,9 +18,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
+    //valida que haya precencia del nombreCompleto en el payload del token y sea unico
     async validate(payload: { nombreCompleto: string }) {
         return this.prisma.usuario.findUnique({
             where: { nombreCompleto: payload.nombreCompleto }
         });
+    
     }
+
+
 }

@@ -1,4 +1,4 @@
-import { ArgumentsHost, Catch, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, Catch, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
 import { BaseExceptionFilter } from '@nestjs/core';
@@ -19,6 +19,28 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
+
+
+    // Detect http exeption errors
+       if (exception instanceof HttpException) {
+      const status = exception.getStatus();
+      const res = exception.getResponse();
+
+      const message =
+        typeof res === 'string'
+          ? res
+          : (res as any)?.message ?? 'Error';
+
+      httpAdapter.reply(
+        response,
+        {
+          status,
+          message,
+        },
+        status,
+      );
+      return;
+    }
 
     // Detect Prisma errors either by instanceof or by checking constructor name
     const isKnownRequestError = exception instanceof Prisma.PrismaClientKnownRequestError || exception?.name === 'PrismaClientKnownRequestError';
@@ -55,21 +77,21 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
 
       const status = statusByCode[exception.code] ?? HttpStatus.BAD_REQUEST;
       const message = formatMessage(exception.code, exception);
-      httpAdapter.reply(response, { statusCode: status, message }, status);
+      httpAdapter.reply(response, { status: status, message }, status);
       return;
     }
 
     if (isValidationError) {
       const status = HttpStatus.BAD_REQUEST;
       const message = (exception.message ?? '').toString().replace(/\n/g, '');
-      httpAdapter.reply(response, { statusCode: status, message }, status);
+      httpAdapter.reply(response, { status: status, message }, status);
       return;
     }
 
     if (isRustPanic || isUnknownRequestError) {
       const status = HttpStatus.INTERNAL_SERVER_ERROR;
       const message = 'Internal database error';
-      httpAdapter.reply(response, { statusCode: status, message }, status);
+      httpAdapter.reply(response, { status: status, message }, status);
       return;
     }
 

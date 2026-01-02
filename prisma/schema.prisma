@@ -89,7 +89,7 @@ model Usuario {
   usuarioId       Int          @id(map: "PK__Usuario__A5B1AB8E7D9176BF") @default(autoincrement())
   rolIdFK         Int
   nombreCompleto  String       @unique @db.VarChar(150)
-  correo          String       @db.VarChar(255)
+  correo          String       @unique @db.VarChar(255)
   contrase_a      String       @map("contraseña") @db.VarChar(255)
   fechaDeCreacion DateTime?    @default(now(), map: "DF__Usuario__fechaDe__4CA06362") @db.DateTime
   Comentario      Comentario[]

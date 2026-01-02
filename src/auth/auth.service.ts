@@ -19,10 +19,10 @@ export class authService {
 
   async login(loginDto: LoginDto): Promise<any> {
     try {
-      const { nombreCompleto,  contrase_a } = loginDto
+      const { correo,  contrase_a } = loginDto
 
       const usuario = await this.prisma.usuario.findUnique({
-        where: { nombreCompleto }
+        where: { correo: correo }
       })
       if (!usuario) {
         throw new NotFoundException('Usuario no encontrado');

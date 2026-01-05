@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config'; 
 import config from './config/configuration.config';
 import { RecetaModule } from './receta/receta.module';
+import { IngredienteModule } from './ingrediente/ingrediente.module';
 
 @Module({
   controllers: [AppController],
@@ -18,6 +19,7 @@ import { RecetaModule } from './receta/receta.module';
          AuthModule,
     UsuariosModule,
     RecetaModule,
+    IngredienteModule
 
   ],
 })

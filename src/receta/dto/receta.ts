@@ -7,7 +7,7 @@ export class RecetaDto {
     })
     @IsInt()
     @IsPositive()
-    usuarioIdFK: number;
+    usuarioId: number;
 
     @ApiProperty({
         example: 'Receta tradicional de pasta',

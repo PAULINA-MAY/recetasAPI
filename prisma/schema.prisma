@@ -31,11 +31,12 @@ model Imagen {
 }
 
 model Ingrediente {
-  ingredienteId   Int       @id(map: "PK__Ingredie__BD695E80D93FC817") @default(autoincrement())
-  nombre          String    @db.VarChar(150)
-  cantidad        Decimal?  @db.Decimal(6, 2)
-  unidad_medida   String?   @db.VarChar(20)
-  fechaDeCreacion DateTime? @default(now(), map: "DF__Ingredien__fecha__5070F446") @db.DateTime
+  ingredienteId      Int                 @id(map: "PK__Ingredie__BD695E80D93FC817") @default(autoincrement())
+  nombre             String              @db.VarChar(150)
+  cantidad           Decimal?            @db.Decimal(6, 2)
+  unidad_medida      String?             @db.VarChar(20)
+  fechaDeCreacion    DateTime?           @default(now(), map: "DF__Ingredien__fecha__5070F446") @db.DateTime
+  recetaIngredientes RecetaIngrediente[]
 }
 
 model Paso {
@@ -58,24 +59,31 @@ model Puntuacion {
 }
 
 model Receta {
-  recetaId          Int       @id(map: "PK__Receta__B9B1CB3DD4EEEB7F") @default(autoincrement())
-  usuarioIdFK       Int
-  descripcion       String    @db.Text
-  tiempoPreparacion DateTime  @db.Time
-  porcion           Int
-  fechaDeCreacion   DateTime? @default(now(), map: "DF__Receta__fechaDeC__534D60F1") @db.DateTime
-  Imagen            Imagen[]
-  Usuario           Usuario   @relation(fields: [usuarioIdFK], references: [usuarioId], onUpdate: NoAction, map: "FK__Receta__usuarioI__5441852A")
+  recetaId           Int                 @id(map: "PK__Receta__B9B1CB3DD4EEEB7F") @default(autoincrement())
+  usuarioIdFK        Int
+  descripcion        String              @db.Text
+  tiempoPreparacion  DateTime            @db.Time
+  porcion            Int
+  fechaDeCreacion    DateTime?           @default(now(), map: "DF__Receta__fechaDeC__534D60F1") @db.DateTime
+  Imagen             Imagen[]
+  Usuario            Usuario             @relation(fields: [usuarioIdFK], references: [usuarioId], onUpdate: NoAction, map: "FK__Receta__usuarioI__5441852A")
+  recetaIngredientes RecetaIngrediente[]
 }
 
 model RecetaIngrediente {
-  recetaIngredienteId Int          @id(map: "PK__RecetaIn__F3B157761F8985F1") @default(autoincrement())
+  recetaIngredienteId Int       @id(map: "PK__RecetaIn__F3B157761F8985F1") @default(autoincrement())
   idRecetaFK          Int
   idIngredienteFK     Int
-  fechaDeCreacion     DateTime?    @default(now(), map: "DF__RecetaIng__fecha__571DF1D5") @db.DateTime
-  Comentario          Comentario[]
-  Paso                Paso[]
-  Puntuacion          Puntuacion[]
+  fechaDeCreacion     DateTime? @default(now()) @db.DateTime
+
+  receta      Receta      @relation(fields: [idRecetaFK], references: [recetaId])
+  ingrediente Ingrediente @relation(fields: [idIngredienteFK], references: [ingredienteId])
+
+  Comentario Comentario[]
+  Paso       Paso[]
+  Puntuacion Puntuacion[]
+
+  @@unique([idRecetaFK, idIngredienteFK])
 }
 
 model Rol {

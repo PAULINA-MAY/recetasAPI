@@ -13,7 +13,7 @@ export class IngredienteController {
     @ApiOperation({ summary: 'Obtener todos los ingredientes' })
     @ApiOkResponse({ type: '', description: 'Lista de ingredientes' })
     getIngredientes() {
-        return 'function not implemented yet';
+        return this.ingredienteService.getAllIngredientes();
     }
 
     

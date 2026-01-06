@@ -11,7 +11,6 @@ export class RecetaService {
   async getAllRecetas(): Promise<ApiResponse<RecetaModel[]>> {
     try {
       const recetas = await this.prisma.receta.findMany();
-      console.log("Recetas:", recetas);
       if (!recetas || recetas.length === 0) {
         throw new NotFoundException('No se encontraron roles');
       } else {
@@ -26,69 +25,105 @@ export class RecetaService {
       throw err;
     }
   }
-  async getRecetasByiD(id: number): Promise<ApiResponse<RecetaModel[]>> {
-    try {
-      const recetas = await this.prisma.receta.findUnique({
-        where: {
-          recetaId: id
-        }
+async getRecetasByiD(id: number): Promise<ApiResponse<RecetaModel[]>> {
+  try {
+    const receta = await this.prisma.receta.findUnique({
+      where: {
+        recetaId: id,
+      },
+      include: {
+        recetaIngredientes: {
+          include: {
+            ingrediente: true, 
+          },
+        },
+      },
+    });
+
+    if (!receta) {
+      throw new NotFoundException('No se encontró la receta');
+    }
+
+    return {
+      status: 200,
+      message: 'Receta obtenida correctamente',
+      data: [receta],
+    };
+  } catch (err) {
+    throw err;
+  }
+}
+
+ async createReceta(
+  id: number,
+  dto: CreateRecetaDto,
+): Promise<ApiResponse<RecetaModel[]>> {
+  try {
+    const recetaCreated = await this.prisma.receta.create({
+      data: {
+        usuarioIdFK: id,
+        descripcion: dto.descripcion,
+        tiempoPreparacion: dto.tiempoPreparacion,
+        porcion: dto.porcion,
+      },
+    });
+
+    return {
+      status: 201,
+      message: 'Receta creada correctamente',
+      data: [recetaCreated],
+    };
+  } catch (err) {
+    throw err;
+  }
+}
+
+async updateReceta(
+  id: number,
+  dto: UpdateRecetaDto,
+): Promise<ApiResponse<RecetaModel[]>> {
+  try {
+    const recetaUpdated = await this.prisma.receta.update({
+      where: { recetaId: id },
+      data: { ...dto },
+    });
+
+    return {
+      status: 200,
+      message: 'Receta actualizada correctamente',
+      data: [recetaUpdated],
+    };
+  } catch (err) {
+    if (err.code === 'P2025') {
+      throw new NotFoundException('No se encontró la receta');
+    }
+    throw err;
+  }
+}
+
+async deleteReceta(id: number): Promise<ApiResponse<RecetaModel[]>> {
+  try {
+    const recetaDeleted = await this.prisma.$transaction(async (tx) => {
+      await tx.recetaIngrediente.deleteMany({
+        where: { idRecetaFK: id },
       });
-      if (!recetas || recetas === null || recetas === undefined) {
-        throw new NotFoundException('No se encontró la receta');
-      }else{
-         return {
-        status: 200,
-        message: 'Recetas obtenidas correctamente',
-        data: recetas ? [recetas] : [],
-      };
-      }
-     
 
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  async createReceta(id: number, dto: CreateRecetaDto): Promise<ApiResponse<RecetaModel[]>> {
-    try {
-      const recetaCreated = await this.prisma.receta.create({ data: { usuarioIdFK: id, descripcion: dto.descripcion, tiempoPreparacion: dto.tiempoPreparacion, porcion: dto.porcion } });
-      return {
-        status: 201,
-        message: 'Receta creada correctamente',
-        data: [recetaCreated],
-      };
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  async updateReceta(id: number, dto: UpdateRecetaDto): Promise<ApiResponse<RecetaModel[]>> {
-    try {
-      const recetaUpdated = await this.prisma.receta.update({
+      return tx.receta.delete({
         where: { recetaId: id },
-        data: { ...dto },
       });
-      return {
-        status: 200,
-        message: 'Receta actualizada correctamente',
-        data: [recetaUpdated],
-      };
-    } catch (err) {
-      throw err;
-    }
-  }
+    });
 
-  async deleteReceta(id: number): Promise<ApiResponse<RecetaModel[]>> {
-    try {
-      const recetaDeleted = await this.prisma.receta.delete({ where: { recetaId: id } });
-      return {
-        status: 200,
-        message: 'Receta eliminada correctamente',
-        data: [recetaDeleted],
-      };
-    } catch (err) {
-      throw err;
+    return {
+      status: 200,
+      message: 'Receta eliminada correctamente',
+      data: [recetaDeleted],
+    };
+  } catch (err) {
+    if (err.code === 'P2025') {
+      throw new NotFoundException('No se encontró la receta');
     }
+    throw err;
   }
+}
 
 }

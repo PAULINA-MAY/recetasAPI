@@ -19,15 +19,16 @@ model Comentario {
 
 model Imagen {
   imagenId        Int       @id(map: "PK__Imagen__494B286B16F8F3A2") @default(autoincrement())
-  usuarioFKId     Int
-  recetaIdFK      Int
-  pasoIdFK        Int
+  usuarioFKId     Int?
+  recetaIdFK      Int?
+  pasoIdFK        Int?
   url             String    @db.Text
   tipo            String    @db.VarChar(100)
   fechaDeCreacion DateTime? @default(now(), map: "DF__Imagen__fechaDeC__5CD6CB2B") @db.DateTime
-  Paso            Paso      @relation(fields: [pasoIdFK], references: [PasoId], onUpdate: NoAction, map: "FK__Imagen__pasoIdFK__5FB337D6")
-  Receta          Receta    @relation(fields: [recetaIdFK], references: [recetaId], onUpdate: NoAction, map: "FK__Imagen__recetaId__5EBF139D")
-  Usuario         Usuario   @relation(fields: [usuarioFKId], references: [usuarioId], onUpdate: NoAction, map: "FK__Imagen__usuarioF__5DCAEF64")
+  assetId         String?   @db.NVarChar(Max)
+  Paso            Paso?     @relation(fields: [pasoIdFK], references: [PasoId], onUpdate: NoAction, map: "FK__Imagen__pasoIdFK__5FB337D6")
+  Receta          Receta?   @relation(fields: [recetaIdFK], references: [recetaId], onUpdate: NoAction, map: "FK__Imagen__recetaId__5EBF139D")
+  Usuario         Usuario?  @relation(fields: [usuarioFKId], references: [usuarioId], onUpdate: NoAction, map: "FK__Imagen__usuarioF__5DCAEF64")
 }
 
 model Ingrediente {
@@ -71,17 +72,15 @@ model Receta {
 }
 
 model RecetaIngrediente {
-  recetaIngredienteId Int       @id(map: "PK__RecetaIn__F3B157761F8985F1") @default(autoincrement())
+  recetaIngredienteId Int          @id(map: "PK__RecetaIn__F3B157761F8985F1") @default(autoincrement())
   idRecetaFK          Int
   idIngredienteFK     Int
-  fechaDeCreacion     DateTime? @default(now()) @db.DateTime
-
-  receta      Receta      @relation(fields: [idRecetaFK], references: [recetaId])
-  ingrediente Ingrediente @relation(fields: [idIngredienteFK], references: [ingredienteId])
-
-  Comentario Comentario[]
-  Paso       Paso[]
-  Puntuacion Puntuacion[]
+  fechaDeCreacion     DateTime?    @default(now(), map: "DF__RecetaIng__fecha__571DF1D5") @db.DateTime
+  Comentario          Comentario[]
+  Paso                Paso[]
+  Puntuacion          Puntuacion[]
+  ingrediente         Ingrediente  @relation(fields: [idIngredienteFK], references: [ingredienteId])
+  receta              Receta       @relation(fields: [idRecetaFK], references: [recetaId])
 
   @@unique([idRecetaFK, idIngredienteFK])
 }

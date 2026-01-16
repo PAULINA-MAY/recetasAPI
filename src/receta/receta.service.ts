@@ -94,9 +94,6 @@ async updateReceta(
       data: [recetaUpdated],
     };
   } catch (err) {
-    if (err.code === 'P2025') {
-      throw new NotFoundException('No se encontró la receta');
-    }
     throw err;
   }
 }
@@ -119,9 +116,7 @@ async deleteReceta(id: number): Promise<ApiResponse<RecetaModel[]>> {
       data: [recetaDeleted],
     };
   } catch (err) {
-    if (err.code === 'P2025') {
-      throw new NotFoundException('No se encontró la receta');
-    }
+  
     throw err;
   }
 }

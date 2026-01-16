@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import config from './config/configuration.config';
 import { RecetaModule } from './receta/receta.module';
 import { IngredienteModule } from './ingrediente/ingrediente.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   controllers: [AppController],
@@ -19,7 +20,8 @@ import { IngredienteModule } from './ingrediente/ingrediente.module';
          AuthModule,
     UsuariosModule,
     RecetaModule,
-    IngredienteModule
+    IngredienteModule,
+    CloudinaryModule
 
   ],
 })

@@ -77,7 +77,7 @@ async uploadAndSaveImage(
     const data: any = {
 url: imagenDto.url,
   tipo: imagenDto.tipo,
-  assetId: cloudinaryResult.asset_id,
+  assetId: cloudinaryResult.public_id,
     };
 
 if (imagenDto.usuarioFkId !== undefined) data.Usuario = { connect: { usuarioId: imagenDto.usuarioFkId } };

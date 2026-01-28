@@ -19,6 +19,7 @@ import { PrismaModule } from "src/prisma/prisma.module";
            signOptions: { expiresIn: '5m' },
         };
       },
+      
       inject: [ConfigService],
     }),
     PrismaModule

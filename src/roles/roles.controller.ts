@@ -18,6 +18,7 @@ export class RolesController {
     getRoles() {
         return this.rolesService.getAllRoles();
     }
+    
     @Get(':id')
     @ApiOperation({ summary: 'Obtener rol por id' })
     @ApiOkResponse({ type: RoleDto, description: 'Rol con especifico id.' })

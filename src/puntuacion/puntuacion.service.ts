@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PuntuacionModel } from 'generated/prisma/models';
 import { ApiResponse } from 'src/global/response/response';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreatePuntuacionDto } from './dto/createPuntuacion.dto';
 
 @Injectable()
 export class PuntuacionService {
@@ -54,6 +55,27 @@ export class PuntuacionService {
                 message: 'Puntuación obtenida correctamente',
                 data: puntuacion,
             };
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async createPuntuacion(dto:CreatePuntuacionDto): Promise<ApiResponse<PuntuacionModel>> {
+        try {
+              const res =   await this.prisma.puntuacion.create({
+                    data: {
+                        IdUsuarioFK: dto.IdUsuarioFK,       
+                        RecetaIngredienteFKId: dto.RecetaIngredienteFKId,
+                        puntuacion: dto.puntuacion,
+                    },  
+                });
+  
+                return {
+                    status: 201,
+                    message: 'Puntuación creada correctamente',
+                    data: res,
+                };
+            
         } catch (err) {
             throw err;
         }

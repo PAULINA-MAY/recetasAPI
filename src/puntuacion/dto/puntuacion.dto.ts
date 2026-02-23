@@ -4,9 +4,7 @@ import { IsDecimal, IsNotEmpty, Min } from "class-validator";
 export class PuntuacionDto {
     @ApiProperty({ example: 1 })
     puntuacionId: number;
-    @ApiProperty({ example: 1 })
-    RecetaIngredienteFKId: number
-    @ApiProperty({ example: 1 })
+    RecetaIngredienteFKId: number;
     IdUsuarioFK: number;
     @ApiProperty({ example: 4.5 })
     @IsDecimal(
@@ -16,4 +14,5 @@ export class PuntuacionDto {
     @IsNotEmpty({ message: 'El precio es requerido' })
     @Min(0, { message: 'El precio debe ser mayor o igual a 0' })
     puntuacion: number;
+    fechaCreacion: Date;
 }

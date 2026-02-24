@@ -3,6 +3,7 @@ import { PuntuacionModel } from 'generated/prisma/models';
 import { ApiResponse } from 'src/global/response/response';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePuntuacionDto } from './dto/createPuntuacion.dto';
+import { UpdatePuntuacionDto } from './dto/updatePuntuacion.dto';
 
 @Injectable()
 export class PuntuacionService {
@@ -81,5 +82,27 @@ export class PuntuacionService {
         }
     }
 
-    
-}
+    async updatePuntuacion(idReceta: number,idUsuario:number, dto: UpdatePuntuacionDto): Promise<ApiResponse<PuntuacionModel>> {
+        try {
+            const res = await this.prisma.puntuacion.update({
+                where: {
+                    puntuacionId: idReceta,
+                },
+                data: {
+                    IdUsuarioFK:idUsuario,       
+                    RecetaIngredienteFKId: idReceta,
+                    puntuacion: dto.puntuacion,
+                },
+            });
+
+            return {
+                status: 200,
+                message: 'Puntuación actualizada correctamente',
+                data: res,
+            };
+        } catch (err) {
+            throw err;
+        }
+    }
+
+ }

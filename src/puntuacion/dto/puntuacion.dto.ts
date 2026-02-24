@@ -2,7 +2,6 @@ import {  ApiProperty } from "@nestjs/swagger";
 import { IsDecimal, IsNotEmpty, Min } from "class-validator";
 
 export class PuntuacionDto {
-    @ApiProperty({ example: 1 })
     puntuacionId: number;
     RecetaIngredienteFKId: number;
     IdUsuarioFK: number;

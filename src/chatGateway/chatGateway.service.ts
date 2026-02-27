@@ -20,4 +20,33 @@ export class ChatGatewayService {
             throw err;
           }
     }
+
+    async deleteComentario(idComentario: number) {
+      try {
+        const comentarioEliminado = await this.prisma.comentario.delete({
+          where: {
+            comentarioId: idComentario,
+          },
+        });
+        return comentarioEliminado;
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    async updateComentario(idComentario: number, comentario: string) {
+      try {
+        const comentarioActualizado = await this.prisma.comentario.update({
+          where: {
+            comentarioId: idComentario,
+          },
+          data: {
+            comentario: comentario,
+          },
+        });
+        return comentarioActualizado;
+      } catch (err) {
+        throw err;
+      }
+    }
 }

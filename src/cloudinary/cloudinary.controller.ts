@@ -3,19 +3,24 @@ import {
   Post,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from './cloudinary.service';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/guard/auth/auth.guard';
 
 @ApiTags('Cloudinary')
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard) 
 @Controller('imagenes')
 export class CloudinaryController {
   constructor(private cloudinaryService: CloudinaryService) {}

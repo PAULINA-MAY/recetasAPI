@@ -11,6 +11,7 @@ import { IngredienteModule } from './ingrediente/ingrediente.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PasoModule } from './paso/paso.module';
 import { PuntuacionModule } from './puntuacion/puntuacion.module';
+import { ChatGatewayModule } from './chatGateway/chatGateway.module';
 
 @Module({
   controllers: [AppController],
@@ -26,7 +27,7 @@ import { PuntuacionModule } from './puntuacion/puntuacion.module';
     CloudinaryModule,
     PasoModule,
     PuntuacionModule,
-
+    ChatGatewayModule
 
   ],
 })

@@ -26,4 +26,25 @@ export class ChatGateway {
 
     return comentario;
   }
+
+  @SubscribeMessage('eliminar-comentario')
+  async handleEliminarComentario(@MessageBody() idComentario: number) {
+    const comentario = await this.chatGatewayService.deleteComentario(
+        idComentario
+    );
+    this.server.emit('comentario-eliminado', comentario);
+    return comentario;
+  }
+
+  @SubscribeMessage('mensaje')
+  async handleUpdateMenssage(@MessageBody() idComentario:number,comentario:string) {
+    const comentarioActualizado = await this.chatGatewayService.updateComentario(
+        idComentario,comentario
+    );
+    this.server.emit('comentario-actualizado', comentarioActualizado);
+    return comentarioActualizado;
+
+
+  }
+
 }

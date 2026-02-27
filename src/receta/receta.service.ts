@@ -34,7 +34,21 @@ async getRecetasByiD(id: number): Promise<ApiResponse<RecetaModel[]>> {
       include: {
         recetaIngredientes: {
           include: {
-            ingrediente: true, 
+            ingrediente: true,
+            Paso: {
+              select: {
+                PasoId: true,
+                numeroPaso: true,
+                descripcion: true,
+              },
+            },
+            Comentario: {
+              select: {
+                comentarioId: true,
+                comentario: true,
+                fechaDeCreacion: true,
+              },
+            },
           },
         },
       },

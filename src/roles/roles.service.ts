@@ -25,21 +25,33 @@ export class RolesService {
     }
   }
 
-  async getRolesById(id: number): Promise<ApiResponse<RolModel[]>> {
-    try {
-      const role = await this.prisma.rol.findUnique({ where: { rolId: id } });
+async getRolesById(id: number): Promise<ApiResponse<RolModel[]>> {
+  try {
+    const role = await this.prisma.rol.findUnique({
+      where: { rolId: id },
+    });
+
+    if (!role) {
       return {
-        status: 200,
-        message: 'Rol obtenido correctamente',
-        data: role? [role]: [],
-      }
-    } catch (err) {
-      throw err;
+        status: 404,
+        message: 'El rol no existe',
+        data: [],
+      };
     }
+
+    return {
+      status: 200,
+      message: 'Rol obtenido correctamente',
+      data: [role],
+    };
+  } catch (err) {
+    throw err;
   }
+}
 
   async createRole(tipo: string): Promise<ApiResponse<RolModel[]>> {
     try {
+     
       const roleCreated = await this.prisma.rol.create({ data: { tipo } });
       return {
         status: 201,
@@ -53,6 +65,18 @@ export class RolesService {
 
   async updateRole(id: number, tipo: string): Promise<ApiResponse<RolModel[]>> {
     try {
+          const role = await this.prisma.rol.findUnique({
+      where: { rolId: id },
+    });
+
+    if (!role) {
+      return {
+        status: 404,
+        message: 'El rol no existe',
+        data: [],
+      };
+    }
+
       const roleUpdated = await this.prisma.rol.update({
         where: { rolId: id },
         data: { tipo },

@@ -47,15 +47,16 @@ export class authService {
     }
   }
 
-  async registro(createUsuarioDto: CreateUsuariosDto):Promise<any> {
+  async registro(nombreCompleto: string, correo: string, contrase_a: string):Promise<any> {
     try {
-    const createUser = new UsuariosDto();
-    createUser.rolIdFK = 1;
-    createUser.nombreCompleto = createUsuarioDto.nombreCompleto;
-    createUser.correo = createUsuarioDto.correo;
+
     const salt = await bcrypt.genSalt();
-    createUser.contrase_a = await bcrypt.hash(createUsuarioDto.contrase_a, salt);
-     const usuario = await this.usuarios.createUsuario(createUser);   
+  const hashedPassword = await bcrypt.hash(contrase_a, salt);
+     const usuario = await this.usuarios.createUsuario({
+    nombreCompleto: nombreCompleto,
+    correo: correo,
+    contrase_a: hashedPassword,
+  });   
       return usuario;
     } catch (err) {
         throw err;

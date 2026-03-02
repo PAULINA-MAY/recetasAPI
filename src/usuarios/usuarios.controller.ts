@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swa
 import { UsuariosService } from "./usuarios.service";
 import { UsuariosDto } from "./dto/usuarios.dto";
 import { JwtAuthGuard } from "src/guard/auth/auth.guard";
+import { CreateUsuariosDto } from "./dto/create-usuario.dto";
 
 @ApiTags('usuarios')
 @Controller('usuarios')
@@ -19,24 +20,19 @@ export class UsuariosController{
   
   }
 
-  @Get(':id')
-  @ApiOperation({summary:'Obtener usuario por id'})
-      @ApiOkResponse({ type: UsuariosDto, description: 'Usuario con especifico id.' })
-  getUsuarioById(id:number){
+ @Get(':id')
+  @ApiOperation({ summary: 'Obtener usuario por id' })
+  @ApiOkResponse({ type: UsuariosDto, description: 'Usuario con id específico.' })
+  getUsuarioById(@Param('id', ParseIntPipe) id: number) {
     return this.usuariosService.getUsuariosById(id);
   }
 
-  @Post()
-  @ApiOperation({summary:'Creación de un nuevo usuario'})
-      @ApiOkResponse({ type: UsuariosDto, description: 'El usuario ha sido creado.' })
-  createUsuario(@Body() dto: UsuariosDto){
-    return this.usuariosService.createUsuario(dto);
-  }
+
  
 @Put(':id')
 @ApiOperation({summary:'Actualizar un usuario por id'})
     @ApiOkResponse({ type: UsuariosDto, description: 'El usuario ha sido actualizado.' })
-updateUsuario(@Param('id', ParseIntPipe) id: number,@Body() dto: UsuariosDto){
+updateUsuario(@Param('id', ParseIntPipe) id: number,@Body() dto: CreateUsuariosDto){
   return this.usuariosService.updateUsuario(id,dto.nombreCompleto,dto.correo,dto.contrase_a); 
 }
 

@@ -12,9 +12,22 @@ import { ApiResponse } from "src/global/response/response";
 export class UsuariosService {
 
     constructor(private prisma: PrismaService) { }
-    async getAllUsuarios(): Promise<ApiResponse<UsuarioModel[]>> {
+    async getAllUsuarios(): Promise<ApiResponse<UsuariosDto[]>> {
         try {
-            const usuarios = await this.prisma.usuario.findMany();
+const usuarios = await this.prisma.usuario.findMany({
+      select: {
+        usuarioId: true,
+        rolIdFK:true,
+        nombreCompleto: true,
+        correo: true,
+        fechaDeCreacion: true,
+        Rol: {                
+          select: {
+            tipo: true,
+          }
+        }
+      }
+    });
             if (!usuarios || usuarios.length === 0) {
                 throw new NotFoundException('No se encontraron usuarios');
             } else {
@@ -31,7 +44,6 @@ export class UsuariosService {
     }
     async getUsuariosById(id: number): Promise<ApiResponse<UsuarioModel[]>> {
         try {
-
             const user = await this.prisma.usuario.findUnique({ where: { usuarioId: id } });
             if (!user || user === null) {
 
@@ -49,7 +61,8 @@ export class UsuariosService {
             throw err;
         }
     }
-    async createUsuario(data: UsuariosDto): Promise<ApiResponse<UsuarioModel[]>> {
+    async createUsuario( 
+  data: CreateUsuariosDto): Promise<ApiResponse<UsuarioModel[]>> {
         try {
             const user = await this.prisma.usuario.findUnique({
                 where: { nombreCompleto: data.nombreCompleto }
@@ -57,18 +70,18 @@ export class UsuariosService {
             if (user) {
                 throw new ConflictException('El usuario ya existe');
             } else {
-                const newUser = await this.prisma.usuario.create({
+          await this.prisma.usuario.create({
                     data: {
-                        rolIdFK: data.rolIdFK,
+                        rolIdFK: 3,
                         nombreCompleto: data.nombreCompleto,
                         correo: data.correo,
                         contrase_a: data.contrase_a,
-                    },
+                    }
                 });
                 return {
                     status: 201,
                     message: 'Usuario creado correctamente',
-                    data: [newUser],
+                    data: [],
                 };
             }
         } catch (err) {

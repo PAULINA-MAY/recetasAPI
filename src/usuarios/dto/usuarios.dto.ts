@@ -19,8 +19,8 @@ export class UsuariosDto {
   @IsEmail()
   correo: string;
 
-  @ApiProperty({ example: 'MiPassword123' })
-  @IsString()
-@Length(1, 8)
-  contrase_a: string;
+
+
+   @ApiProperty({ example: '2023-01-01T00:00:00Z' })
+  fechaDeCreacion: Date | null;
 }

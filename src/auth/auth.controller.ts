@@ -1,8 +1,9 @@
 import { Body, Controller, Post } from "@nestjs/common";
 import { authService } from "./auth.service";
 import { LoginDto } from "./dto/loginDto.auth";
-import { ApiOperation } from "@nestjs/swagger";
+import { ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 import { CreateUsuariosDto } from "src/usuarios/dto/create-usuario.dto";
+import { UsuariosDto } from "src/usuarios/dto/usuarios.dto";
 
 @Controller('auth')
 export class AuthController{
@@ -16,8 +17,9 @@ async login(@Body() loginDto: LoginDto): Promise<any> {
 
 @Post('registro')
    @ApiOperation({ summary: 'Registrar Usuario' })
+       @ApiOkResponse({ type: UsuariosDto, description: 'El usuario se ha regsitrado' })
 async registro(@Body() createUsuarioDto: CreateUsuariosDto) {
-  return this.authService.registro(createUsuarioDto);
+  return this.authService.registro(createUsuarioDto.nombreCompleto, createUsuarioDto.correo, createUsuarioDto.contrase_a);
 }
 
 

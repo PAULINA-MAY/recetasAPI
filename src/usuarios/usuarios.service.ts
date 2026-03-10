@@ -42,25 +42,34 @@ const usuarios = await this.prisma.usuario.findMany({
             throw err;
         }
     }
-    async getUsuariosById(id: number): Promise<ApiResponse<UsuarioModel[]>> {
-        try {
-            const user = await this.prisma.usuario.findUnique({ where: { usuarioId: id } });
-            if (!user || user === null) {
+async getUsuariosById(id: number): Promise<ApiResponse<UsuariosDto[]>> {
+  try {
 
-                throw new NotFoundException('Usuario no encontrado');
-            }
-            else {
-                return {
-                    status: 200,
-                    message: 'Usuarios obtenidos correctamente',
-                    data: [user],
-                };
-            }
+    const user = await this.prisma.usuario.findUnique({
+      where: { usuarioId: id },
+      select: {
+        usuarioId: true,
+        rolIdFK: true,
+        nombreCompleto: true,
+        correo: true,
+        fechaDeCreacion: true
+      }
+    });
 
-        } catch (err) {
-            throw err;
-        }
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
     }
+
+    return {
+      status: 200,
+      message: 'Usuarios obtenidos correctamente',
+      data: [user],
+    };
+
+  } catch (err) {
+    throw err;
+  }
+}
     async createUsuario( 
   data: CreateUsuariosDto): Promise<ApiResponse<UsuarioModel[]>> {
         try {

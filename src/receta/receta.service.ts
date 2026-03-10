@@ -69,13 +69,20 @@ async getRecetasByiD(id: number): Promise<ApiResponse<RecetaModel[]>> {
 }
 
  async createReceta(
-  id: number,
+  idUser: number,
   dto: CreateRecetaDto,
 ): Promise<ApiResponse<RecetaModel[]>> {
   try {
+
+    const userExists = await this.prisma.usuario.findUnique({
+      where: { usuarioId: idUser },
+    });
+    if (!userExists) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
     const recetaCreated = await this.prisma.receta.create({
       data: {
-        usuarioIdFK: id,
+        usuarioIdFK: idUser,
         descripcion: dto.descripcion,
         tiempoPreparacion: dto.tiempoPreparacion,
         porcion: dto.porcion,

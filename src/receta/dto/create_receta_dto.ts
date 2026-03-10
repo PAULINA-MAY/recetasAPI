@@ -1,18 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, OmitType } from "@nestjs/swagger";
 import { IsDateString, IsInt, IsNotEmpty, IsPositive, IsString } from "class-validator";
+import { RecetaDto } from "./receta";
 
-export class CreateRecetaDto {
+export class CreateRecetaDto extends OmitType(RecetaDto, ['fechaDeCreacion','usuarioId'] as const) {
 
-    @IsString()
-    @IsNotEmpty()
-    descripcion: string;
-
-    @IsString()
-    @IsNotEmpty()
-    tiempoPreparacion: string;
-
-    @IsInt()
-    @IsPositive()
-    porcion: number;
 
 }

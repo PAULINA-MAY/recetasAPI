@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/guard/auth/auth.guard";
 import { RecetaService } from "./receta.service";
@@ -27,11 +27,12 @@ export class RecetaController {
         return this.recetaService.getRecetasByiD(id);
     }
 
-    @Post()
+    @Post(':id')
     @ApiOperation({ summary: 'Crear una nueva receta' })
     @ApiOkResponse({ type: RecetaDto, description: 'Receta creada' })
-    createReceta(@Param('id', ParseIntPipe) id: number, dto: CreateRecetaDto) {
-        return this.recetaService.createReceta(id, dto);
+    createReceta(@Param('id', ParseIntPipe) idUser: number,
+    @Body() dto: CreateRecetaDto) {
+        return this.recetaService.createReceta(idUser,dto);
     }
 
     @Put(':id')

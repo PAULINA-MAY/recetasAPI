@@ -28,7 +28,7 @@ export class authService {
         throw new NotFoundException('Usuario no encontrado');
       }
       const isPasswordValid = await bcrypt.compare( contrase_a, usuario.contrase_a);
-
+     
       if (!isPasswordValid) {
         throw new UnauthorizedException('Contraseña no Valida');
       }

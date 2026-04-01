@@ -77,7 +77,6 @@ async getUsuariosById(id: number): Promise<ApiResponse<UsuariosDto[]>> {
             const user = await this.prisma.usuario.findUnique({
                 where: { nombreCompleto: data.nombreCompleto }
             })
-            console.log(user)
             if (user) {
                 throw new ConflictException('El usuario ya existe');
             } else {

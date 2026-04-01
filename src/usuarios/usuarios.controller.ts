@@ -26,13 +26,13 @@ export class UsuariosController{
   getUsuarioById(@Param('id', ParseIntPipe) id: number) {
     return this.usuariosService.getUsuariosById(id);
   }
-  @Post()
+/*   @Post()
   @ApiOperation({summary:'Crear un nuevo usuario'})
     @ApiOkResponse({ type: UsuariosDto, description: 'El usuario ha sido creado.' })
   createUsuario(@Body() dto: CreateUsuariosDto){
     return this.usuariosService.createUsuario(dto);
 
-   }
+   } */
  
 @Put(':id')
 @ApiOperation({summary:'Actualizar un usuario por id'})

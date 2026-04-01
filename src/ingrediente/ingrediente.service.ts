@@ -2,14 +2,14 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { createIngredienteDto } from "./dto/createIngrediente_dto";
 import { ApiResponse } from "src/global/response/response";
-import { IngredienteModel, RecetaModel } from "generated/prisma/models";
+
 import { UpdateIngredienteDto } from "./dto/updateIngrediente_dto";
 
 
 @Injectable()
 export class IngredienteService {
   constructor(private prisma: PrismaService) { }
-  async getAllIngredientes(): Promise<ApiResponse<IngredienteModel[]>> {
+  async getAllIngredientes(): Promise<ApiResponse<any>> {
     try {
       const ingredientes = await this.prisma.ingrediente.findMany();
 
@@ -28,7 +28,7 @@ export class IngredienteService {
     }
   }
 
-  async getIngredienteById(ingredienteId: number): Promise<ApiResponse<IngredienteModel[]>> {
+  async getIngredienteById(ingredienteId: number): Promise<ApiResponse<any>> {
     try {
       const ingrediente = await this.prisma.ingrediente.findUnique({
         where: { ingredienteId },
@@ -51,7 +51,7 @@ export class IngredienteService {
   async createIngrediente(
     dto: createIngredienteDto,
     recetaId: number,
-  ): Promise<ApiResponse<IngredienteModel[]>> {
+  ): Promise<ApiResponse<any>> {
     try {
       const ingrediente = await this.prisma.$transaction(async (tx) => {
 
@@ -94,7 +94,7 @@ export class IngredienteService {
     }
   }
 
-  async updateIngrediente(id: number, dto: UpdateIngredienteDto): Promise<ApiResponse<IngredienteModel[]>> {
+  async updateIngrediente(id: number, dto: UpdateIngredienteDto): Promise<ApiResponse<any>> {
     try {
       const updatedIngrediente = await this.prisma.ingrediente.update({
         where: { ingredienteId: id },
@@ -110,7 +110,7 @@ export class IngredienteService {
     }
   }
 
-  async deleteIngrediente(id: number): Promise<ApiResponse<IngredienteModel[]>> {
+  async deleteIngrediente(id: number): Promise<ApiResponse<any>> {
     try {
       const deletedIngrediente = await this.prisma.ingrediente.delete({
         where: { ingredienteId: id },

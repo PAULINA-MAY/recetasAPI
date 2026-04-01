@@ -1,11 +1,11 @@
 import { ConflictException, Get, Injectable, NotFoundException } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation } from "@nestjs/swagger";
-import { UsuarioModel } from "generated/prisma/models";
+
 import { PrismaService } from "src/prisma/prisma.service";
 import { UsuariosDto } from "./dto/usuarios.dto";
 import * as bcrypt from 'bcrypt';
 import { CreateUsuariosDto } from "./dto/create-usuario.dto";
-import { Usuario } from "generated/prisma/wasm";
+
 import { ApiResponse } from "src/global/response/response";
 
 @Injectable()
@@ -71,17 +71,19 @@ async getUsuariosById(id: number): Promise<ApiResponse<UsuariosDto[]>> {
   }
 }
     async createUsuario( 
-  data: CreateUsuariosDto): Promise<ApiResponse<UsuarioModel[]>> {
+  data: CreateUsuariosDto): Promise<ApiResponse<any>> {
+
         try {
             const user = await this.prisma.usuario.findUnique({
                 where: { nombreCompleto: data.nombreCompleto }
             })
+            console.log(user)
             if (user) {
                 throw new ConflictException('El usuario ya existe');
             } else {
           await this.prisma.usuario.create({
                     data: {
-                        rolIdFK: 3,
+                        rolIdFK: 3,//usuario común
                         nombreCompleto: data.nombreCompleto,
                         correo: data.correo,
                         contrase_a: data.contrase_a,
@@ -98,7 +100,7 @@ async getUsuariosById(id: number): Promise<ApiResponse<UsuariosDto[]>> {
             throw err;
         }
     }
-    async updateUsuario(id: number, nombre: string,correo: string, contrase_a?: string,): Promise<ApiResponse<UsuarioModel[]>> {
+    async updateUsuario(id: number, nombre: string,correo: string, contrase_a?: string,): Promise<ApiResponse<any>> {
         try {
             const usuario = await this.prisma.usuario.findUnique({
                 where: { usuarioId: id },
@@ -134,7 +136,7 @@ async getUsuariosById(id: number): Promise<ApiResponse<UsuariosDto[]>> {
             throw err;
         }
     }
-    async deleteUsuario(id: number): Promise<ApiResponse<UsuarioModel[]>> {
+    async deleteUsuario(id: number): Promise<ApiResponse<any[]>> {
         try {
             const usuario = await this.prisma.usuario.findUnique({
                 where: { usuarioId: id },

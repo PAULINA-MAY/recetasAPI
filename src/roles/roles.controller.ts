@@ -7,8 +7,8 @@ import { JwtAuthGuard } from "src/guard/auth/auth.guard";
 
 @ApiTags('roles')
 @Controller('roles')
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard)
+/* @ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard) */
 export class RolesController {
     constructor(private readonly rolesService: RolesService) { }
 

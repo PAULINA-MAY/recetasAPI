@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PuntuacionModel } from 'generated/prisma/models';
+
 import { ApiResponse } from 'src/global/response/response';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePuntuacionDto } from './dto/createPuntuacion.dto';
@@ -10,7 +10,7 @@ export class PuntuacionService {
     constructor(private readonly prisma: PrismaService) { }
 
 
-    async getPuntuationByRecetaIdAndUsuario(recetaId: number, usuarioId: number): Promise<ApiResponse<PuntuacionModel[]>> {
+    async getPuntuationByRecetaIdAndUsuario(recetaId: number, usuarioId: number): Promise<ApiResponse<any>> {
         try {
             const puntuacion = await this.prisma.puntuacion.findMany({
                 where: {
@@ -36,7 +36,7 @@ export class PuntuacionService {
         }
     }
 
-    async getPuntuation(id: number): Promise<ApiResponse<PuntuacionModel[]>> {
+    async getPuntuation(id: number): Promise<ApiResponse<any>> {
         try {
             const puntuacion = await this.prisma.puntuacion.findMany({
                 where: {
@@ -61,7 +61,7 @@ export class PuntuacionService {
         }
     }
 
-    async createPuntuacion(dto:CreatePuntuacionDto): Promise<ApiResponse<PuntuacionModel>> {
+    async createPuntuacion(dto:CreatePuntuacionDto): Promise<ApiResponse<any>> {
         try {
               const res =   await this.prisma.puntuacion.create({
                     data: {
@@ -82,7 +82,7 @@ export class PuntuacionService {
         }
     }
 
-    async updatePuntuacion(idReceta: number,idUsuario:number, dto: UpdatePuntuacionDto): Promise<ApiResponse<PuntuacionModel>> {
+    async updatePuntuacion(idReceta: number,idUsuario:number, dto: UpdatePuntuacionDto): Promise<ApiResponse<any>> {
         try {
             const res = await this.prisma.puntuacion.update({
                 where: {

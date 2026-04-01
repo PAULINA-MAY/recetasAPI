@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { ApiResponse } from "src/global/response/response";
 import { PrismaService } from "src/prisma/prisma.service";
-import { RecetaModel } from "generated/prisma/models";
+
 import { CreateRecetaDto } from "./dto/create_receta_dto";
 import { UpdateRecetaDto } from "./dto/update_receta_dto";
 
 @Injectable()
 export class RecetaService {
   constructor(private prisma: PrismaService) { }
-  async getAllRecetas(): Promise<ApiResponse<RecetaModel[]>> {
+  async getAllRecetas(): Promise<ApiResponse<any>> {
     try {
       const recetas = await this.prisma.receta.findMany();
       if (!recetas || recetas.length === 0) {
@@ -25,7 +25,7 @@ export class RecetaService {
       throw err;
     }
   }
-async getRecetasByiD(id: number): Promise<ApiResponse<RecetaModel[]>> {
+async getRecetasByiD(id: number): Promise<ApiResponse<any>> {
   try {
     const receta = await this.prisma.receta.findUnique({
       where: {
@@ -71,7 +71,7 @@ async getRecetasByiD(id: number): Promise<ApiResponse<RecetaModel[]>> {
  async createReceta(
   idUser: number,
   dto: CreateRecetaDto,
-): Promise<ApiResponse<RecetaModel[]>> {
+): Promise<ApiResponse<any>> {
   try {
 
     const userExists = await this.prisma.usuario.findUnique({
@@ -102,7 +102,7 @@ async getRecetasByiD(id: number): Promise<ApiResponse<RecetaModel[]>> {
 async updateReceta(
   id: number,
   dto: UpdateRecetaDto,
-): Promise<ApiResponse<RecetaModel[]>> {
+): Promise<ApiResponse<any>> {
   try {
     const recetaUpdated = await this.prisma.receta.update({
       where: { recetaId: id },
@@ -119,7 +119,7 @@ async updateReceta(
   }
 }
 
-async deleteReceta(id: number): Promise<ApiResponse<RecetaModel[]>> {
+async deleteReceta(id: number): Promise<ApiResponse<any>> {
   try {
     const recetaDeleted = await this.prisma.$transaction(async (tx) => {
       await tx.recetaIngrediente.deleteMany({

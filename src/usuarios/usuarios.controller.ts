@@ -7,8 +7,8 @@ import { CreateUsuariosDto } from "./dto/create-usuario.dto";
 
 @ApiTags('usuarios')
 @Controller('usuarios')
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard) 
+/* @ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard)  */
 export class UsuariosController{
   constructor(private readonly  usuariosService: UsuariosService){}
   
@@ -26,8 +26,13 @@ export class UsuariosController{
   getUsuarioById(@Param('id', ParseIntPipe) id: number) {
     return this.usuariosService.getUsuariosById(id);
   }
+  @Post()
+  @ApiOperation({summary:'Crear un nuevo usuario'})
+    @ApiOkResponse({ type: UsuariosDto, description: 'El usuario ha sido creado.' })
+  createUsuario(@Body() dto: CreateUsuariosDto){
+    return this.usuariosService.createUsuario(dto);
 
-
+   }
  
 @Put(':id')
 @ApiOperation({summary:'Actualizar un usuario por id'})

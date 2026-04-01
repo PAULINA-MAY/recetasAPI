@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import type { RolModel } from '../../generated/prisma/models/Rol';
+
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { ApiResponse } from "src/global/response/response";
 @Injectable()
 export class RolesService {
 
   constructor(private prisma: PrismaService) { }
-  async getAllRoles(): Promise<ApiResponse<RolModel[]>> {
+  async getAllRoles(): Promise<ApiResponse<any>> {
     try {
       const roles = await this.prisma.rol.findMany();
       if (!roles || roles.length === 0) {
@@ -25,7 +25,7 @@ export class RolesService {
     }
   }
 
-async getRolesById(id: number): Promise<ApiResponse<RolModel[]>> {
+async getRolesById(id: number): Promise<ApiResponse<any>> {
   try {
     const role = await this.prisma.rol.findUnique({
       where: { rolId: id },
@@ -49,7 +49,7 @@ async getRolesById(id: number): Promise<ApiResponse<RolModel[]>> {
   }
 }
 
-  async createRole(tipo: string): Promise<ApiResponse<RolModel[]>> {
+  async createRole(tipo: string): Promise<ApiResponse<any>> {
     try {
      
       const roleCreated = await this.prisma.rol.create({ data: { tipo } });
@@ -63,7 +63,7 @@ async getRolesById(id: number): Promise<ApiResponse<RolModel[]>> {
     }
   }
 
-  async updateRole(id: number, tipo: string): Promise<ApiResponse<RolModel[]>> {
+  async updateRole(id: number, tipo: string): Promise<ApiResponse<any>> {
     try {
           const role = await this.prisma.rol.findUnique({
       where: { rolId: id },
@@ -92,7 +92,7 @@ async getRolesById(id: number): Promise<ApiResponse<RolModel[]>> {
   }
 
 
-  async deleteRole(id: number): Promise<ApiResponse<RolModel[]>> {
+  async deleteRole(id: number): Promise<ApiResponse<any>> {
     try {
       const roleDeleted = await this.prisma.rol.delete({ where: { rolId: id } });
       return {

@@ -8,9 +8,14 @@ export class RecetaDto {
     @IsInt()
     @IsPositive()
     usuarioId: number;
-
+          @ApiProperty({
+        example: 'Pasta roja',
+    })
+    @IsString()
+    @IsNotEmpty()
+    titulo: string;
     @ApiProperty({
-        example: 'Receta tradicional de pasta',
+        example: 'Pasta roja con salsa de tomate y albahaca',
     })
     @IsString()
     @IsNotEmpty()
@@ -34,6 +39,7 @@ export class RecetaDto {
         example: '2025-01-01T12:00:00Z',
         required: false,
     })
+    
     @IsDateString()
     fechaDeCreacion?: Date;
 }

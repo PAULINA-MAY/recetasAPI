@@ -27,10 +27,10 @@ export class RecetaController {
         return this.recetaService.getRecetasByiD(id);
     }
 
-    @Post(':id')
+    @Post(':idUser')
     @ApiOperation({ summary: 'Crear una nueva receta' })
     @ApiOkResponse({ type: RecetaDto, description: 'Receta creada' })
-    createReceta(@Param('id', ParseIntPipe) idUser: number,
+    createReceta(@Param('idUser', ParseIntPipe) idUser: number,
     @Body() dto: CreateRecetaDto) {
         return this.recetaService.createReceta(idUser,dto);
     }

@@ -1,11 +1,13 @@
 generator client {
   provider = "prisma-client-js"
+  url      = env("DATABASE_URL")
 }
 
 datasource db {
   provider = "sqlserver"
-  url      = env("DATABASE_URL")
+  
 }
+
 
 model Comentario {
   comentarioId          Int               @id(map: "PK__Comentar__3966EC043C714905") @default(autoincrement())
@@ -63,9 +65,10 @@ model Receta {
   recetaId           Int                 @id(map: "PK__Receta__B9B1CB3DD4EEEB7F") @default(autoincrement())
   usuarioIdFK        Int
   descripcion        String              @db.Text
-  tiempoPreparacion  DateTime            @db.Time
+  tiempoPreparacion  String              @db.Text
   porcion            Int
   fechaDeCreacion    DateTime?           @default(now(), map: "DF__Receta__fechaDeC__534D60F1") @db.DateTime
+  titulo             String              @db.NVarChar(255)
   Imagen             Imagen[]
   Usuario            Usuario             @relation(fields: [usuarioIdFK], references: [usuarioId], onUpdate: NoAction, map: "FK__Receta__usuarioI__5441852A")
   recetaIngredientes RecetaIngrediente[]

@@ -86,6 +86,7 @@ async getRecetasByiD(id: number): Promise<ApiResponse<any>> {
         descripcion: dto.descripcion,
         tiempoPreparacion: dto.tiempoPreparacion,
         porcion: dto.porcion,
+        titulo: dto.titulo
       },
     });
 
@@ -121,23 +122,16 @@ async updateReceta(
 
 async deleteReceta(id: number): Promise<ApiResponse<any>> {
   try {
-    const recetaDeleted = await this.prisma.$transaction(async (tx) => {
-      await tx.recetaIngrediente.deleteMany({
-        where: { idRecetaFK: id },
-      });
-
-      return tx.receta.delete({
-        where: { recetaId: id },
-      });
+    const recetaDeleted = await this.prisma.receta.delete({
+      where: { recetaId: id },
     });
 
     return {
       status: 200,
       message: 'Receta eliminada correctamente',
-      data: [recetaDeleted],
+      data: recetaDeleted,
     };
   } catch (err) {
-  
     throw err;
   }
 }

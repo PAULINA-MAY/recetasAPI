@@ -6,7 +6,7 @@ import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-cl
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-
+    console.log('DATABASE_URL desde main.ts:', process.env.DATABASE_URL);
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   app.enableShutdownHooks()

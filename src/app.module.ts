@@ -12,13 +12,16 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PasoModule } from './paso/paso.module';
 import { PuntuacionModule } from './puntuacion/puntuacion.module';
 import { ChatGatewayModule } from './chatGateway/chatGateway.module';
+import { PrismaService } from './prisma/prisma.service';
 
 @Module({
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PrismaService],
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, load: [config], envFilePath: '.env', }),
-
+   ConfigModule.forRoot({ isGlobal: true, load: [config], envFilePath: '.env', }),
+/* ConfigModule.forRoot({
+      isGlobal: true, 
+    }), */
     RolesModule,
     AuthModule,
     UsuariosModule,

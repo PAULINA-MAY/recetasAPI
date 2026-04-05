@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/guard/auth/auth.guard';
 import { PasoService } from './paso.service';
@@ -31,7 +31,7 @@ export class PasoController {
    @Post(':recetaId')
     @ApiOperation({ summary: 'Create paso for a receta' })
   @ApiOkResponse({ type: [PasoDto], description: 'Paso creado para una receta' })
-  createPaso(@Param('recetaId', ParseIntPipe)recetaId: number, dto: CreatePasoDto){
+  createPaso(@Param('recetaId', ParseIntPipe)recetaId: number, @Body() dto: CreatePasoDto){
     return this.pasoService.createPaso(recetaId, dto);
     }
 

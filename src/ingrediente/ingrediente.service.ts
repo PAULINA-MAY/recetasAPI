@@ -63,7 +63,7 @@ export class IngredienteService {
         if (!receta) {
           throw new NotFoundException('La receta no existe');
         }
-
+           console.log('dto:', dto); 
         //  Crear ingrediente
         const ingredienteCreado = await tx.ingrediente.create({
           data: {

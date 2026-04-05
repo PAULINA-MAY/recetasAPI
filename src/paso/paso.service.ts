@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 
 import { ApiResponse } from 'src/global/response/response';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdateRecetaDto } from 'src/receta/dto/update_receta_dto';
 import { UpdatePasoDto } from './dto/updatePaso.dto';
 import { CreatePasoDto } from './dto/createPaso.dto';
 

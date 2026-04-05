@@ -1,14 +1,14 @@
 import { ApiOperation, ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsDecimal, IsNotEmpty } from "class-validator";
+import { IsDateString, IsDecimal, IsNotEmpty, IsNumber } from "class-validator";
 
 export class IngredienteDto {
     @ApiProperty({ example: 'Azúcar' })
+       @IsNotEmpty()
     nombre: string;
         @ApiProperty({ example: '100.00' })
     @IsNotEmpty()
-    @IsDecimal({ decimal_digits: '2' })
-    @IsNotEmpty()
-    cantidad: number;
+@IsNumber({ maxDecimalPlaces: 2 })
+cantidad: number;
         @ApiProperty({ example: 'gramos' })
     @IsNotEmpty()
     unidad_medida: string;

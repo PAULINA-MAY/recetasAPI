@@ -28,9 +28,7 @@ export class RecetaService {
 async getRecetasByiD(id: number): Promise<ApiResponse<any>> {
   try {
     const receta = await this.prisma.receta.findUnique({
-      where: {
-        recetaId: id,
-      },
+      where: { recetaId: id },
       include: {
         recetaIngredientes: {
           include: {
@@ -42,13 +40,6 @@ async getRecetasByiD(id: number): Promise<ApiResponse<any>> {
                 descripcion: true,
               },
             },
-            Comentario: {
-              select: {
-                comentarioId: true,
-                comentario: true,
-                fechaDeCreacion: true,
-              },
-            },
           },
         },
       },
@@ -58,10 +49,28 @@ async getRecetasByiD(id: number): Promise<ApiResponse<any>> {
       throw new NotFoundException('No se encontró la receta');
     }
 
+    //EXTRAER DATOS
+    const ingredientes = receta.recetaIngredientes.map(ri => ri.ingrediente);
+
+    const pasos = receta.recetaIngredientes.flatMap(ri => ri.Paso);
+
+    //RESPUESTA 
+    const resultado = {
+      recetaId: receta.recetaId,
+      usuarioIdFK: receta.usuarioIdFK,
+      titulo: receta.titulo,
+      descripcion: receta.descripcion,
+      tiempoPreparacion: receta.tiempoPreparacion,
+      porcion: receta.porcion,
+      fechaDeCreacion: receta.fechaDeCreacion,
+      ingredientes,
+      pasos
+    };
+
     return {
       status: 200,
       message: 'Receta obtenida correctamente',
-      data: [receta],
+      data: [resultado],
     };
   } catch (err) {
     throw err;

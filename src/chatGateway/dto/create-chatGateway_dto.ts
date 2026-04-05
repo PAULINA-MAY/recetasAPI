@@ -1,6 +1,7 @@
 import { OmitType, PartialType } from "@nestjs/swagger";
-import { ChatGatewayDto } from "./chatGateway_dto";
+import { ComentarioDto } from "./chatGateway_dto";
 
-export class CreateChatGatewayDto extends PartialType(OmitType(ChatGatewayDto, ['comentarioId'] as const)) {
-    
-}
+export class CreateChatGatewayDto extends OmitType(
+  ComentarioDto,
+  ['comentarioId', 'FKUsuarioId', 'RecetaIngredienteIdFK'] as const
+) {}

@@ -6,19 +6,22 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChatGatewayService } from '../chatGateway.service';
 import { CreateChatGatewayDto } from './create-chatGateway_dto';
+import { ComentarioService } from 'src/comentario/comentario.service';
+import { Param } from '@nestjs/common';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class ChatGateway {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
-  constructor(private readonly chatGatewayService: ChatGatewayService) {}
+  constructor(private readonly comentarioService: ComentarioService) {}
 
   @SubscribeMessage('crear-comentario')
-  async handleCrearComentario(@MessageBody() dto: CreateChatGatewayDto) {
-    const comentario = await this.chatGatewayService.createComentario(
+  async handleCrearComentario( @Param('idReceta') idReceta: number, @Param('idUsuario') idUsuario: number, @MessageBody() dto: CreateChatGatewayDto) {
+    const comentario = await this.comentarioService.createComentario(
+        idReceta,
+        idUsuario,
         dto
     );
 
@@ -29,7 +32,7 @@ export class ChatGateway {
 
   @SubscribeMessage('eliminar-comentario')
   async handleEliminarComentario(@MessageBody() idComentario: number) {
-    const comentario = await this.chatGatewayService.deleteComentario(
+    const comentario = await this.comentarioService.deleteComentario(
         idComentario
     );
     this.server.emit('comentario-eliminado', comentario);
@@ -38,7 +41,7 @@ export class ChatGateway {
 
   @SubscribeMessage('mensaje')
   async handleUpdateMenssage(@MessageBody() idComentario:number,comentario:string) {
-    const comentarioActualizado = await this.chatGatewayService.updateComentario(
+    const comentarioActualizado = await this.comentarioService.updateComentario(
         idComentario,comentario
     );
     this.server.emit('comentario-actualizado', comentarioActualizado);

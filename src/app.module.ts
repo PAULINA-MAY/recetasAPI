@@ -13,15 +13,13 @@ import { PasoModule } from './paso/paso.module';
 import { PuntuacionModule } from './puntuacion/puntuacion.module';
 import { ChatGatewayModule } from './chatGateway/chatGateway.module';
 import { PrismaService } from './prisma/prisma.service';
+import { ComentarioModule } from './comentario/comentario.module';
 
 @Module({
   controllers: [AppController],
   providers: [AppService, PrismaService],
   imports: [
    ConfigModule.forRoot({ isGlobal: true, load: [config], envFilePath: '.env', }),
-/* ConfigModule.forRoot({
-      isGlobal: true, 
-    }), */
     RolesModule,
     AuthModule,
     UsuariosModule,
@@ -30,7 +28,8 @@ import { PrismaService } from './prisma/prisma.service';
     CloudinaryModule,
     PasoModule,
     PuntuacionModule,
-    ChatGatewayModule
+    ChatGatewayModule,
+    ComentarioModule
 
   ],
 })

@@ -1,9 +1,10 @@
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { IngredienteService } from "./ingrediente.service";
-import { Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "src/guard/auth/auth.guard";
 import { IngredienteDto } from "./dto/ingrediente";
 import { UpdateIngredienteDto } from "./dto/updateIngrediente_dto";
+import { createIngredienteDto } from "./dto/createIngrediente_dto";
 
 @ApiTags('ingredientes')
 @Controller('ingredientes')
@@ -28,7 +29,7 @@ export class IngredienteController {
     @Post(':id')
     @ApiOperation({ summary: 'Crear un nuevo ingrediente' })
     @ApiResponse({ type: IngredienteDto, description: 'Ingrediente creado correctamente' })
-    createIngrediente(@Param('id', ParseIntPipe) id: number, dto: IngredienteDto) {
+    createIngrediente(@Param('id', ParseIntPipe) id: number, @Body() dto: createIngredienteDto) {
         return this.ingredienteService.createIngrediente(dto, id);
     }
 

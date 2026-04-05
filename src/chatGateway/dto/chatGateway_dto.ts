@@ -1,11 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmpty, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
-export class ChatGatewayDto {
+export class ComentarioDto {
         @ApiProperty({ example: 'id' })
     @IsString()
  @IsNotEmpty()
     comentarioId: string;
+
     @ApiProperty({ example: 1 })
     @IsNumber()
  @IsNotEmpty()

@@ -1,11 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { IsString, Length } from 'class-validator';
+import { RoleDto } from './role.dto';
 
-export class CreateRoleDto {
-  @ApiProperty({ description: 'Tipo de rol', example: 'admin' })
-  @IsString()
-  @Length(1, 150)
-  tipo: string;
+export class CreateRoleDto extends OmitType(RoleDto, ['rolId','fechaMod','fechaBaja','usuarioMod','usuarioBaja', 'estatus'] as const) {
+
 }
 
 

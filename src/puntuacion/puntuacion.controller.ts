@@ -5,6 +5,7 @@ import { PuntuacionDto } from './dto/puntuacion.dto';
 import { PuntuacionService } from './puntuacion.service';
 import { CreatePuntuacionDto } from './dto/createPuntuacion.dto';
 import { UpdatePuntuacionDto } from './dto/updatePuntuacion.dto';
+import { RequestCreateRoleDto } from 'src/roles/dto/role.dto';
 @ApiTags('puntuacion')
 @Controller('puntuacion')
 @ApiBearerAuth('access-token')
@@ -31,30 +32,26 @@ export class PuntuacionController {
     return this.puntuacionService.getPuntuation(puntuacionId);
   }
 
-@Post(':recetaId')
+@Post(':recetaId/:idUsuario')
     @ApiOperation({ summary: 'Crear una nueva puntuación para una receta' })
-  @ApiOkResponse({ type: PuntuacionDto, description: 'Puntuación creada exitosamente' })  
+  @ApiOkResponse({ type: RequestCreateRoleDto, description: 'Puntuación creada exitosamente' })  
 createPuntuacion(
   @Param('recetaId', ParseIntPipe) recetaId: number,
-  @Req() req,
+    @Param('idUsuario', ParseIntPipe) idUsuario: number,
   @Body() dto: CreatePuntuacionDto,
 ){
-  return this.puntuacionService.createPuntuacion({
-    ...dto,
-    IdUsuarioFK: req.user.userId,
-    RecetaIngredienteFKId: recetaId,
-  });
+  return this.puntuacionService.createPuntuacion(recetaId, idUsuario, dto);
 }
 
-@Put(':recetaId/update')
+@Put(':recetaId/:idUsuario/update')
     @ApiOperation({ summary: 'Actualizar una puntuación existente para una receta' })
   @ApiOkResponse({ type: PuntuacionDto, description: 'Puntuación actualizada exitosamente' })  
 updatePuntuacion(
   @Param('recetaId', ParseIntPipe) recetaId: number,
-  @Req() req,
+    @Param('idUsuario', ParseIntPipe) idUsuario: number,
   @Body() dto: UpdatePuntuacionDto,
 ){
-  return this.puntuacionService.updatePuntuacion(recetaId, req.user.userId, dto);
+ return this.puntuacionService.updatePuntuacion(recetaId, idUsuario, dto);
 }
 
  

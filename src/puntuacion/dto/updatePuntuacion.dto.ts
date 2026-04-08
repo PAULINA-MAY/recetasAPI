@@ -1,6 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, OmitType } from "@nestjs/swagger";
+import { PuntuacionDto } from "./puntuacion.dto";
 
-export class UpdatePuntuacionDto {
-    @ApiProperty({ example: 4 })
-    puntuacion: number;
+export class UpdatePuntuacionDto extends OmitType(PuntuacionDto, ['puntuacionId', 'fechaCreacion'] as const) {
+
 }

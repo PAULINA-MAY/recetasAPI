@@ -5,9 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlserver"
-  
 }
-
 
 model Comentario {
   comentarioId          Int               @id(map: "PK__Comentar__3966EC043C714905") @default(autoincrement())
@@ -92,6 +90,12 @@ model Rol {
   rolId           Int       @id(map: "PK__Rol__5402363404DC0F4D") @default(autoincrement())
   tipo            String    @unique @db.VarChar(150)
   fechaDeCreacion DateTime? @default(now(), map: "DF__Rol__fechaDeCrea__49C3F6B7") @db.DateTime
+  usuarioAlta     String?   @db.VarChar(100)
+  usuarioBaja     String?   @db.VarChar(100)
+  fechaBaja       DateTime? @db.DateTime
+  usuarioMod      String?   @db.VarChar(100)
+  fechaMod        DateTime? @db.DateTime
+  estatus         String?   @default("AC", map: "DF_Rol_estatus") @db.VarChar(25)
   Usuario         Usuario[]
 }
 

@@ -61,26 +61,58 @@ export class PuntuacionService {
         }
     }
 
-    async createPuntuacion(dto:CreatePuntuacionDto): Promise<ApiResponse<any>> {
-        try {
-              const res =   await this.prisma.puntuacion.create({
-                    data: {
-                        IdUsuarioFK: dto.IdUsuarioFK,       
-                        RecetaIngredienteFKId: dto.RecetaIngredienteFKId,
-                        puntuacion: dto.puntuacion,
-                    },  
-                });
-  
-                return {
-                    status: 201,
-                    message: 'Puntuación creada correctamente',
-                    data: res,
-                };
-            
-        } catch (err) {
-            throw err;
-        }
+  async createPuntuacion(
+  idReceta: number,
+  idUsuario: number,
+  dto: CreatePuntuacionDto
+): Promise<ApiResponse<any>> {
+  try {
+    const existing = await this.prisma.puntuacion.findFirst({
+      where: {
+        IdUsuarioFK: idUsuario,
+        RecetaIngredienteFKId: idReceta,
+      },
+    });
+
+    let res;
+
+    if (existing) {
+      //  UPDATE
+      res = await this.prisma.puntuacion.update({
+        where: {
+          puntuacionId: existing.puntuacionId,
+        },
+        data: {
+          puntuacion: dto.puntuacion,
+        },
+      });
+
+      return {
+        status: 200,
+        message: 'Puntuación actualizada correctamente',
+        data: res,
+      };
+    } else {
+      //  CREATE
+      res = await this.prisma.puntuacion.create({
+        data: {
+          IdUsuarioFK: idUsuario,
+          RecetaIngredienteFKId: idReceta,
+          puntuacion: dto.puntuacion,
+        },
+      });
+
+      return {
+        status: 201,
+        message: 'Puntuación creada correctamente',
+        data: res,
+      };
     }
+  } catch (err) {
+    console.error('Error al guardar la puntuación:', err);
+    throw err;
+  }
+}
 
     async updatePuntuacion(idReceta: number,idUsuario:number, dto: UpdatePuntuacionDto): Promise<ApiResponse<any>> {
         try {
@@ -101,6 +133,7 @@ export class PuntuacionService {
                 data: res,
             };
         } catch (err) {
+            console.log(err)
             throw err;
         }
     }

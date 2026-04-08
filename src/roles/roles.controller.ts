@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Put, Param, ParseIntPipe, Delete, UseGuard
 import { RolesService } from "./roles.service";
 import { CreateRoleDto } from './dto/create-role.dto';
 import { ApiTags, ApiOperation, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { RoleDto } from './dto/role.dto';
+import { RequestCreateRoleDto, RoleDto } from './dto/role.dto';
 import { JwtAuthGuard } from "src/guard/auth/auth.guard";
 
 @ApiTags('roles')
@@ -28,9 +28,9 @@ export class RolesController {
 
     @Post()
     @ApiOperation({ summary: 'Creacion de un nuevo rol' })
-    @ApiCreatedResponse({ type: RoleDto, description: 'El rol ha sido creado.' })
+    @ApiCreatedResponse({ type: RequestCreateRoleDto, description: 'El rol ha sido creado.' })
     createRole(@Body() dto: CreateRoleDto) {
-        return this.rolesService.createRole(dto.tipo);
+        return this.rolesService.createRole(dto);
     }
 
     @Put(':id')

@@ -47,7 +47,7 @@ export class IngredienteService {
       throw err;
     }
   }
-
+//solo se le van a agregar los campos de auditoria
   async createIngrediente(
     dto: createIngredienteDto,
     recetaId: number,
@@ -94,6 +94,8 @@ export class IngredienteService {
     }
   }
 
+
+  //se le va a gregar la arquitectura que se maneja en roles dto y dto response
   async updateIngrediente(id: number, dto: UpdateIngredienteDto): Promise<ApiResponse<any>> {
     try {
       const updatedIngrediente = await this.prisma.ingrediente.update({

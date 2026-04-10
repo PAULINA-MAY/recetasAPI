@@ -2,6 +2,12 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsDateString, IsInt, IsNotEmpty, IsPositive, IsString } from "class-validator";
 
 export class RecetaDto {
+        @ApiProperty({
+        example: 1,
+    })
+    @IsInt()
+    @IsPositive()
+    recetaId: number;
     @ApiProperty({
         example: 1,
     })

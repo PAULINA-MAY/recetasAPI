@@ -3,28 +3,81 @@ import { ApiResponse } from "src/global/response/response";
 import { PrismaService } from "src/prisma/prisma.service";
 
 import { CreateRecetaDto, ResponseCreateRecetaDto } from "./dto/create_receta_dto";
-import { UpdateRecetaDto } from "./dto/update_receta_dto";
+import { ResponseUpdateRecetaDto, UpdateRecetaDto } from "./dto/update_receta_dto";
+import { DeleteRecetaDto, ResponseDeleteRecetaDto } from "./dto/delete-receta.dto";
 
 @Injectable()
 export class RecetaService {
   constructor(private prisma: PrismaService) { }
-  async getAllRecetas(): Promise<ApiResponse<any>> {
+  async getRecetasAc(): Promise<ApiResponse<any[]>> {
     try {
-      const recetas = await this.prisma.receta.findMany();
-      if (!recetas || recetas.length === 0) {
-        throw new NotFoundException('No se encontraron roles');
-      } else {
-        return {
-          status: 200,
-          message: 'Recetas obtenidas correctamente',
-          data: recetas,
-        };
-      }
+ const rol = await this.prisma.receta.findMany({
+      where: { estatus: 'AC' },
+      select: {
+        recetaId: true,
+        titulo: true,
+        usuarioIdFK: true,
+        fechaDeCreacion: true,
+        estatus: true,
+      },
+    });
 
-    } catch (err) {
+  
+    if (!rol || rol.length === 0) {
+      return {
+        status: 404,
+        message: 'No se encontraron recetas activas',
+        data: [],
+      };
+    }
+
+    return {
+      status: 200,
+      message: 'Recetas obtenidas correctamente',
+      data: rol,
+    };
+    }
+      catch (err) {
+
       throw err;
     }
   }
+
+    async getRecetasBa(): Promise<ApiResponse<any[]>> {
+    try {
+ const rol = await this.prisma.receta.findMany({
+      where: { estatus: 'BA' },
+      select: {
+        recetaId: true,
+        titulo: true,
+        usuarioIdFK: true,
+        fechaDeCreacion: true,
+        estatus: true,
+      },
+    });
+
+  
+    if (!rol || rol.length === 0) {
+      return {
+        status: 404,
+        message: 'No se encontraron recetas inactivas',
+        data: [],
+      };
+    }
+
+    return {
+      status: 200,
+      message: 'Recetas obtenidas correctamente',
+      data: rol,
+    };
+    }
+      catch (err) {
+
+      throw err;
+    }
+  }
+
+
 async getRecetasByiD(id: number): Promise<ApiResponse<any>> {
   try {
     const receta = await this.prisma.receta.findUnique({
@@ -108,19 +161,19 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
       
         const res: ResponseCreateRecetaDto = {
           recetaId: recetaCreated.recetaId,
-          usuarioIdFK: recetaCreated.usuarioIdFK,
+         usuarioId: recetaCreated.usuarioIdFK,
           titulo: recetaCreated.titulo,
           descripcion: recetaCreated.descripcion,
           tiempoPreparacion: recetaCreated.tiempoPreparacion,
           porcion: recetaCreated.porcion,
-          fechaDeCreacion: recetaCreated.fechaDeCreacion,
-          usuarioAlta: recetaCreated.usuarioAlta!,
-          estatus: recetaCreated.estatus,
+          fechaDeCreacion: recetaCreated.fechaDeCreacion!,
+          usuarioAlta: recetaCreated.UsuarioAlta!,
+          estatus: recetaCreated.estatus!,
         };
     return {
       status: 201,
       message: 'Receta creada correctamente',
-      data: [res],
+      data: res,
     };
   } catch (err) {
     throw err;
@@ -128,39 +181,86 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
 }
 
 async updateReceta(
-  id: number,
+  idReceta: number,
   dto: UpdateRecetaDto,
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<ResponseUpdateRecetaDto>> {
   try {
+
+        const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+
+const now = new Date();
+const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+
     const recetaUpdated = await this.prisma.receta.update({
-      where: { recetaId: id },
-      data: { ...dto },
+      where: { recetaId: idReceta, estatus: 'AC' },
+      data: {  fechaMod: localDate , usuarioMod: dto.usuarioMod, descripcion: dto.descripcion, tiempoPreparacion: dto.tiempoPreparacion, porcion: dto.porcion, titulo: dto.titulo},
     });
+
+    const res: ResponseUpdateRecetaDto = {
+        recetaId: recetaUpdated.recetaId,
+        usuarioId: recetaUpdated.usuarioIdFK,
+        titulo: recetaUpdated.titulo,
+        descripcion: recetaUpdated.descripcion,
+        tiempoPreparacion: recetaUpdated.tiempoPreparacion,
+        porcion: recetaUpdated.porcion,
+        fechaMod: recetaUpdated.fechaMod!,
+        usuarioMod: recetaUpdated.UsuarioMod!,
+        estatus: recetaUpdated.estatus!,
+      };
+
+   
+
 
     return {
       status: 200,
       message: 'Receta actualizada correctamente',
-      data: [recetaUpdated],
+      data: res,
     };
   } catch (err) {
     throw err;
   }
 }
 
-async deleteReceta(id: number): Promise<ApiResponse<any>> {
+
+  async deleteReceta(idReceta: number, dto:DeleteRecetaDto): Promise<ApiResponse<ResponseDeleteRecetaDto>> {
   try {
-    const recetaDeleted = await this.prisma.receta.delete({
-      where: { recetaId: id },
+
+          const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+
+const now = new Date();
+const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+    const recetaDeleted = await this.prisma.receta.update({
+      where: { recetaId: idReceta },
+      data: { fechaBaja: localDate, usuarioBaja: dto.usuarioBaja, estatus: 'BA' },
     });
 
+ const res: ResponseDeleteRecetaDto= {
+    recetaId: recetaDeleted.recetaId,
+    usuarioId: recetaDeleted.usuarioIdFK,
+    titulo: recetaDeleted.titulo,
+    descripcion: recetaDeleted.descripcion,
+    tiempoPreparacion: recetaDeleted.tiempoPreparacion,
+    porcion: recetaDeleted.porcion,
+    fechaBaja: recetaDeleted.fechaBaja!,
+    usuarioBaja: recetaDeleted.UsuarioBaja!,
+    estatus: recetaDeleted.estatus!,
+  };
     return {
       status: 200,
       message: 'Receta eliminada correctamente',
-      data: recetaDeleted,
+      data: res,
     };
   } catch (err) {
     throw err;
   }
 }
-
 }
+
+
+
+
+
+
+
+
+

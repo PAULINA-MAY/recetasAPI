@@ -3,8 +3,9 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swa
 import { JwtAuthGuard } from "src/guard/auth/auth.guard";
 import { RecetaService } from "./receta.service";
 import { RecetaDto } from "./dto/receta";
-import { CreateRecetaDto } from "./dto/create_receta_dto";
-import { UpdateRecetaDto } from "./dto/update_receta_dto";
+import { CreateRecetaDto, ResponseCreateRecetaDto } from "./dto/create_receta_dto";
+import { ResponseUpdateRecetaDto, UpdateRecetaDto } from "./dto/update_receta_dto";
+import { DeleteRecetaDto, ResponseDeleteRecetaDto } from "./dto/delete-receta.dto";
 
 @ApiTags('recetas')
 @Controller('recetas')
@@ -12,13 +13,20 @@ import { UpdateRecetaDto } from "./dto/update_receta_dto";
 @UseGuards(JwtAuthGuard)
 export class RecetaController {
     constructor(private readonly recetaService: RecetaService) { }
-    @Get()
-    @ApiOperation({ summary: 'Obtener todas las recetas' })
-    @ApiOkResponse({ type: [RecetaDto], description: 'Lista de recetas' })
-    getRecetas() {
-        return this.recetaService.getAllRecetas();
-    }
 
+         @Get('Roles/AC')
+         @ApiOperation({ summary: 'Obtener todos los roles activos' })
+         @ApiOkResponse({ type: [ResponseCreateRecetaDto], description: 'Lista de recetas activas.' })
+         getRolesAc() {
+             return this.recetaService.getRecetasAc();
+         }
+     
+             @Get('Roles/BA')
+         @ApiOperation({ summary: 'Obtener todos los roles inactivos' })
+         @ApiOkResponse({ type: [ResponseDeleteRecetaDto], description: 'Lista de recetas inactivas.' })
+         getRolesBa() {
+             return this.recetaService.getRecetasBa();
+         }
 
     @Get(':id')
     @ApiOperation({ summary: 'Obtener una receta por ID' })
@@ -29,23 +37,23 @@ export class RecetaController {
 
     @Post(':idUser')
     @ApiOperation({ summary: 'Crear una nueva receta' })
-    @ApiOkResponse({ type: RecetaDto, description: 'Receta creada' })
+    @ApiOkResponse({ type: ResponseCreateRecetaDto, description: 'Receta creada' })
     createReceta(@Param('idUser', ParseIntPipe) idUser: number,
     @Body() dto: CreateRecetaDto) {
         return this.recetaService.createReceta(idUser,dto);
     }
 
-    @Put(':id')
+    @Put(':idReceta')
     @ApiOperation({ summary: 'Actualizar una receta por ID' })
-    @ApiOkResponse({ type: RecetaDto, description: 'Receta actualizada' })
-    updateReceta(@Param('id', ParseIntPipe) id: number, dto: UpdateRecetaDto) {
-        return this.recetaService.updateReceta(id, dto);
+    @ApiOkResponse({ type: ResponseUpdateRecetaDto, description: 'Receta actualizada' })
+    updateReceta(@Param('idReceta', ParseIntPipe) idReceta: number, dto: UpdateRecetaDto) {
+        return this.recetaService.updateReceta(idReceta, dto);
     }
 
-    @Delete(':id')
+    @Delete(':idReceta')
     @ApiOperation({ summary: 'Eliminar una receta por ID' })
-    @ApiOkResponse({ type: RecetaDto, description: 'Receta eliminada' })
-    deleteReceta(@Param('id', ParseIntPipe) id: number) {
-        return this.recetaService.deleteReceta(id);
+    @ApiOkResponse({ type: ResponseDeleteRecetaDto, description: 'Receta eliminada' })
+    deleteReceta(@Param('idReceta', ParseIntPipe) idReceta: number, @Body() dto: DeleteRecetaDto) {
+        return this.recetaService.deleteReceta(idReceta, dto);
     }
 }

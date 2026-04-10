@@ -21,9 +21,12 @@ export class authService {
     try {
       const { correo,  contrase_a } = loginDto
 
-      const usuario = await this.prisma.usuario.findUnique({
-        where: { correo: correo }
-      })
+const usuario = await this.prisma.usuario.findUnique({
+  where: { correo: correo },
+  include: {
+    Rol: true
+  }
+});
       if (!usuario) {
         throw new NotFoundException('Usuario no encontrado');
       }
@@ -37,7 +40,8 @@ export class authService {
   token: this.jwtService.sign({
     usuarioId: usuario.usuarioId,
     nombreCompleto: usuario.nombreCompleto,
-    correo: usuario.correo
+    correo: usuario.correo,
+    rol: usuario.Rol.tipo
   })
 }
 
@@ -47,16 +51,17 @@ export class authService {
     }
   }
 
-  async registro(nombreCompleto: string, correo: string, contrase_a: string):Promise<any> {
+  async registro(dto: CreateUsuariosDto):Promise<any> {
     try {
 
     const salt = await bcrypt.genSalt();
-  const hashedPassword = await bcrypt.hash(contrase_a, salt);
-     const usuario = await this.usuarios.createUsuario({
-    nombreCompleto: nombreCompleto,
-    correo: correo,
-    contrase_a: hashedPassword,
-  });   
+  const hashedPassword = await bcrypt.hash(dto.contrase_a, salt);
+     const usuario = await this.usuarios.createUsuario(
+   dto.nombreCompleto,
+    dto.correo,
+   hashedPassword,
+   dto.usuarioAlta
+  );   
       return usuario;
     } catch (err) {
         throw err;

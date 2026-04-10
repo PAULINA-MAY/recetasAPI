@@ -91,10 +91,10 @@ model Rol {
   tipo            String    @unique @db.VarChar(150)
   fechaDeCreacion DateTime? @default(now(), map: "DF__Rol__fechaDeCrea__49C3F6B7") @db.DateTime
   usuarioAlta     String?   @db.VarChar(100)
-  usuarioBaja     String?   @db.VarChar(100)
-  fechaBaja       DateTime? @db.DateTime
-  usuarioMod      String?   @db.VarChar(100)
-  fechaMod        DateTime? @db.DateTime
+  usuarioBaja     String?   @default("", map: "DF_Rol_usuarioBaja") @db.VarChar(100)
+  fechaBaja       DateTime? @default(dbgenerated("1999-04-08T15:00:00"), map: "DF_Rol_fechaBaja") @db.DateTime
+  usuarioMod      String?   @default("", map: "DF_Rol_usuarioMod") @db.VarChar(100)
+  fechaMod        DateTime? @default(dbgenerated("1999-04-08T15:00:00"), map: "DF_Rol_fechaMod") @db.DateTime
   estatus         String?   @default("AC", map: "DF_Rol_estatus") @db.VarChar(25)
   Usuario         Usuario[]
 }
@@ -106,6 +106,12 @@ model Usuario {
   correo          String       @unique @db.VarChar(255)
   contrase_a      String       @map("contraseña") @db.VarChar(255)
   fechaDeCreacion DateTime?    @default(now(), map: "DF__Usuario__fechaDe__4CA06362") @db.DateTime
+  UsuarioAlta     String?      @default("", map: "DF_Usuario_UsuarioAlta") @db.VarChar(100)
+  UsuarioBaja     String?      @default("", map: "DF_Usuario_UsuarioBaja") @db.VarChar(100)
+  fechaBaja       DateTime?    @default(dbgenerated("1999-04-08 15:00:00.000"), map: "DF_Usuario_fechaBaja") @db.DateTime
+  UsuarioMod      String?      @default("", map: "DF_Usuario_UsuarioMod") @db.VarChar(100)
+  fechaMod        DateTime?    @default(dbgenerated("1999-04-08 15:00:00.000"), map: "DF_Usuario_fechaMod") @db.DateTime
+  estatus         String?      @default("AC", map: "DF_Usuario_estatus") @db.VarChar(25)
   Comentario      Comentario[]
   Imagen          Imagen[]
   Puntuacion      Puntuacion[]

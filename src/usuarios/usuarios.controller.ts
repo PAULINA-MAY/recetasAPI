@@ -3,49 +3,48 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swa
 import { UsuariosService } from "./usuarios.service";
 import { UsuariosDto } from "./dto/usuarios.dto";
 import { JwtAuthGuard } from "src/guard/auth/auth.guard";
-import { CreateUsuariosDto } from "./dto/create-usuario.dto";
+import { CreateUsuariosDto, ResponseCreateUsuarioDto } from "./dto/create-usuario.dto";
+import { ResponseUpdateUsuarioDto, UpdateUsuariosDto } from "./dto/update-usuario.dto";
+import { DeleteUsuarioDto, ResponseDeleteUsuarioDto } from "./dto/delete-usuario.dto";
+
 
 @ApiTags('usuarios')
 @Controller('usuarios')
-/* @ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard)  */
+ @ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard)  
 export class UsuariosController{
   constructor(private readonly  usuariosService: UsuariosService){}
   
-  @Get()
-  @ApiOperation({summary:'Obtener todos los usuarios'})
-      @ApiOkResponse({ type: [UsuariosDto], description: 'Lista de usuarios' })
-  getUsuarios(){
-    return this.usuariosService.getAllUsuarios();
-  
-  }
 
- @Get(':id')
-  @ApiOperation({ summary: 'Obtener usuario por id' })
-  @ApiOkResponse({ type: UsuariosDto, description: 'Usuario con id específico.' })
-  getUsuarioById(@Param('id', ParseIntPipe) id: number) {
-    return this.usuariosService.getUsuariosById(id);
-  }
-/*   @Post()
-  @ApiOperation({summary:'Crear un nuevo usuario'})
-    @ApiOkResponse({ type: UsuariosDto, description: 'El usuario ha sido creado.' })
-  createUsuario(@Body() dto: CreateUsuariosDto){
-    return this.usuariosService.createUsuario(dto);
 
-   } */
+    @Get('Usuarios/AC')
+    @ApiOperation({ summary: 'Obtener todos los usuarios activos' })
+    @ApiOkResponse({ type: [ResponseCreateUsuarioDto], description: 'Lista de usuarios activos.' })
+    getUsuariosAc() {
+        return this.usuariosService.getUsuariosAc();
+    }
+
+        @Get('Usuarios/BA')
+    @ApiOperation({ summary: 'Obtener todos los usuarios inactivos' })
+    @ApiOkResponse({ type: [ResponseDeleteUsuarioDto], description: 'Lista de usuarios inactivos.' })
+    getUsuariosBa() {
+        return this.usuariosService.getUsuariosBa();
+    }
+
+
  
-@Put(':id')
+@Put(':idUsuario')
 @ApiOperation({summary:'Actualizar un usuario por id'})
-    @ApiOkResponse({ type: UsuariosDto, description: 'El usuario ha sido actualizado.' })
-updateUsuario(@Param('id', ParseIntPipe) id: number,@Body() dto: CreateUsuariosDto){
-  return this.usuariosService.updateUsuario(id,dto.nombreCompleto,dto.correo,dto.contrase_a); 
+    @ApiOkResponse({ type: ResponseUpdateUsuarioDto, description: 'El usuario ha sido actualizado.' })
+updateUsuario(@Param('idUsuario', ParseIntPipe) idUsuario: number,@Body() dto: UpdateUsuariosDto){
+  return this.usuariosService.updateUsuario(idUsuario,dto); 
 }
 
-@Delete(':id')
+@Delete(':idUsuario')
 @ApiOperation({summary:'Eliminar un usuario por id'})
-    @ApiOkResponse({ type: UsuariosDto, description: 'El usuario ha sido eliminado.' })
-deleteUsuario(@Param('id', ParseIntPipe) id: number){
-  return this.usuariosService.deleteUsuario(id);  
+    @ApiOkResponse({ type: ResponseDeleteUsuarioDto, description: 'El usuario ha sido eliminado.' })
+deleteUsuario(@Param('idUsuario', ParseIntPipe) idUsuario: number, @Body() dto: DeleteUsuarioDto){
+  return this.usuariosService.deleteUsuario(idUsuario, dto);  
 }
 
 

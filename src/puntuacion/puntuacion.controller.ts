@@ -5,7 +5,8 @@ import { PuntuacionDto } from './dto/puntuacion.dto';
 import { PuntuacionService } from './puntuacion.service';
 import { CreatePuntuacionDto } from './dto/createPuntuacion.dto';
 import { UpdatePuntuacionDto } from './dto/updatePuntuacion.dto';
-import { RequestCreateRoleDto } from 'src/roles/dto/role.dto';
+
+
 @ApiTags('puntuacion')
 @Controller('puntuacion')
 @ApiBearerAuth('access-token')
@@ -34,7 +35,7 @@ export class PuntuacionController {
 
 @Post(':recetaId/:idUsuario')
     @ApiOperation({ summary: 'Crear una nueva puntuación para una receta' })
-  @ApiOkResponse({ type: RequestCreateRoleDto, description: 'Puntuación creada exitosamente' })  
+  @ApiOkResponse({ type: PuntuacionDto, description: 'Puntuación creada exitosamente' })  
 createPuntuacion(
   @Param('recetaId', ParseIntPipe) recetaId: number,
     @Param('idUsuario', ParseIntPipe) idUsuario: number,

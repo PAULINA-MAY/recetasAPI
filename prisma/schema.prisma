@@ -67,6 +67,12 @@ model Receta {
   porcion            Int
   fechaDeCreacion    DateTime?           @default(now(), map: "DF__Receta__fechaDeC__534D60F1") @db.DateTime
   titulo             String              @db.NVarChar(255)
+  UsuarioAlta        String?             @default("", map: "DF_Receta_UsuarioAlta") @db.VarChar(100)
+  UsuarioBaja        String?             @default("", map: "DF_Receta_UsuarioBaja") @db.VarChar(100)
+  fechaBaja          DateTime?           @default(dbgenerated("1999-04-08 15:00:00.000"), map: "DF_Receta_fechaBaja") @db.DateTime
+  UsuarioMod         String?             @default("", map: "DF_Receta_UsuarioMod") @db.VarChar(100)
+  fechaMod           DateTime?           @default(dbgenerated("1999-04-08 15:00:00.000"), map: "DF_Receta_fechaMod") @db.DateTime
+  estatus            String?             @default("AC", map: "DF_Receta_estatus") @db.VarChar(25)
   Imagen             Imagen[]
   Usuario            Usuario             @relation(fields: [usuarioIdFK], references: [usuarioId], onUpdate: NoAction, map: "FK__Receta__usuarioI__5441852A")
   recetaIngredientes RecetaIngrediente[]

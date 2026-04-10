@@ -39,7 +39,32 @@ export class RecetaDto {
         example: '2025-01-01T12:00:00Z',
         required: false,
     })
+
+    @ApiProperty({ example: 'SYSTEM', required: false })
+ @IsNotEmpty({ message: 'El usuario de alta es requerido' })
+  usuarioAlta: string;
     
     @IsDateString()
     fechaDeCreacion?: Date;
+
+    @ApiProperty({ example: '2026-04-08T12:00:00.000Z', required: false })
+   @IsNotEmpty({ message: 'La fecha de modificación es requerida' })
+  fechaMod: Date;
+
+    @ApiProperty({ example: 'SYSTEM', required: false })
+     @IsNotEmpty({ message: 'El usuario de modificación es requerido' })
+  usuarioMod: string;
+
+  @ApiProperty({ example: '2026-04-08T15:00:00.000Z', required: false })
+   @IsNotEmpty({ message: 'La fecha de baja es requerida' })
+
+  fechaBaja: Date;
+
+    @ApiProperty({ example: 'SYSTEM', required: false })
+     @IsNotEmpty({ message: 'El usuario de baja es requerido' })
+  usuarioBaja: string;
+
+     @ApiProperty({ example: 'estatus', required: false })
+       @IsNotEmpty({ message: 'El estatus es requerido' })
+  estatus: string;
 }

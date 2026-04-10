@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { ApiResponse } from "src/global/response/response";
 import { PrismaService } from "src/prisma/prisma.service";
 
-import { CreateRecetaDto } from "./dto/create_receta_dto";
+import { CreateRecetaDto, ResponseCreateRecetaDto } from "./dto/create_receta_dto";
 import { UpdateRecetaDto } from "./dto/update_receta_dto";
 
 @Injectable()
@@ -80,8 +80,12 @@ async getRecetasByiD(id: number): Promise<ApiResponse<any>> {
  async createReceta(
   idUser: number,
   dto: CreateRecetaDto,
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<ResponseCreateRecetaDto>> {
   try {
+   const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+
+const now = new Date();
+const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
 
     const userExists = await this.prisma.usuario.findUnique({
       where: { usuarioId: idUser },
@@ -95,14 +99,28 @@ async getRecetasByiD(id: number): Promise<ApiResponse<any>> {
         descripcion: dto.descripcion,
         tiempoPreparacion: dto.tiempoPreparacion,
         porcion: dto.porcion,
-        titulo: dto.titulo
+        titulo: dto.titulo,
+        fechaDeCreacion: localDate,
+        usuarioAlta: dto.usuarioAlta,
       },
     });
 
+      
+        const res: ResponseCreateRecetaDto = {
+          recetaId: recetaCreated.recetaId,
+          usuarioIdFK: recetaCreated.usuarioIdFK,
+          titulo: recetaCreated.titulo,
+          descripcion: recetaCreated.descripcion,
+          tiempoPreparacion: recetaCreated.tiempoPreparacion,
+          porcion: recetaCreated.porcion,
+          fechaDeCreacion: recetaCreated.fechaDeCreacion,
+          usuarioAlta: recetaCreated.usuarioAlta!,
+          estatus: recetaCreated.estatus,
+        };
     return {
       status: 201,
       message: 'Receta creada correctamente',
-      data: [recetaCreated],
+      data: [res],
     };
   } catch (err) {
     throw err;

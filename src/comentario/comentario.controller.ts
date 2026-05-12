@@ -1,6 +1,6 @@
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ComentarioService } from "./comentario.service";
-import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "src/guard/auth/auth.guard";
 import { CreateChatGatewayDto } from "src/chatGateway/dto/create-chatGateway_dto";
 import { ComentarioDto } from "src/chatGateway/dto/chatGateway_dto";
@@ -41,5 +41,9 @@ export class ComentarioController {
     @Body() dto: CreateChatGatewayDto
   ) {
     return this.comentarioService.createComentario(id, idUsuario, dto);
+  }
+  @Delete(':id')
+  deleteComentById(@Param('id', ParseIntPipe) id: number) {
+    return this.comentarioService.deleteComentarioById(id);
   }
 }

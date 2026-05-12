@@ -32,7 +32,7 @@ export class ChatGateway {
 
   @SubscribeMessage('eliminar-comentario')
   async handleEliminarComentario(@MessageBody() idComentario: number) {
-    const comentario = await this.comentarioService.deleteComentario(
+    const comentario = await this.comentarioService.deleteComentarioById(
         idComentario
     );
     this.server.emit('comentario-eliminado', comentario);

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { CreateChatGatewayDto } from "src/chatGateway/dto/create-chatGateway_dto";
 import { ApiResponse } from "src/global/response/response";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -37,7 +37,7 @@ async getAllComentarios(): Promise<ApiResponse<any>> {
                 RecetaIngredienteIdFK: recetaId,
             },
             orderBy: {
-                comentarioId: 'desc', // opcional
+                comentarioId: 'desc', 
             },
         });
 
@@ -53,8 +53,8 @@ async getAllComentarios(): Promise<ApiResponse<any>> {
         idUsuario: number,
         dto: CreateChatGatewayDto
     ): Promise<ApiResponse<any>> {
-
-        const comentario = await this.prisma.comentario.create({
+      try {
+         const comentario = await this.prisma.comentario.create({
             data: {
                 FKUsuarioId: idUsuario,
                 RecetaIngredienteIdFK: idReceta,
@@ -67,34 +67,24 @@ async getAllComentarios(): Promise<ApiResponse<any>> {
             message: 'Comentario creado correctamente',
             data: comentario,
         };
+        
+      } catch (err) {
+        throw new InternalServerErrorException({
+  status: 500,
+  message: 'Error al eliminar los comentarios',
+});
+      }
+       
     }
 
-    async deleteComentario(comentarioId: number): Promise<ApiResponse<any>> {
-    const comentarioExistente = await this.prisma.comentario.findUnique({
-      where: { comentarioId },
-    });
-
-    if (!comentarioExistente) {
-      throw new NotFoundException('Comentario no encontrado');
-    }
-
-    await this.prisma.comentario.delete({
-      where: { comentarioId },
-    });
-
-    return {
-      status: 200,
-      message: 'Comentario eliminado correctamente',
-      data: null,
-    };
-  }
 
 
       async updateComentario(
     comentarioId: number,
     nuevoTexto: string
   ): Promise<ApiResponse<any>> {
-    const comentarioExistente = await this.prisma.comentario.findUnique({
+    try {
+      const comentarioExistente = await this.prisma.comentario.findUnique({
       where: { comentarioId },
     });
 
@@ -112,6 +102,36 @@ async getAllComentarios(): Promise<ApiResponse<any>> {
       message: 'Comentario actualizado correctamente',
       data: comentarioActualizado,
     };
+      
+    } catch (err) {
+      throw new InternalServerErrorException({
+  status: 500,
+  message: 'Error al eliminar los comentarios',
+});
+    }
   }
+
+async deleteComentarioById(
+  comentarioId: number,
+): Promise<ApiResponse<any>> {
+  try {
+    await this.prisma.comentario.delete({
+      where: {
+        comentarioId: comentarioId,
+      },
+    });
+    
+    return {
+      status: 200,
+      message: 'Comentario eliminado correctamente',
+      data: {},
+    };
+  } catch (err) {
+throw new InternalServerErrorException({
+  status: 500,
+  message: 'Error al eliminar los comentarios',
+});
+  }
+}
 
 }

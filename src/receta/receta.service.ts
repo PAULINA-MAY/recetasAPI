@@ -154,7 +154,7 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
         porcion: dto.porcion,
         titulo: dto.titulo,
         fechaDeCreacion: localDate,
-        usuarioAlta: dto.usuarioAlta,
+        UsuarioAlta: dto.usuarioAlta,
       },
     });
 
@@ -193,7 +193,7 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
 
     const recetaUpdated = await this.prisma.receta.update({
       where: { recetaId: idReceta, estatus: 'AC' },
-      data: {  fechaMod: localDate , usuarioMod: dto.usuarioMod, descripcion: dto.descripcion, tiempoPreparacion: dto.tiempoPreparacion, porcion: dto.porcion, titulo: dto.titulo},
+      data: {  fechaMod: localDate , UsuarioMod: dto.usuarioMod, descripcion: dto.descripcion, tiempoPreparacion: dto.tiempoPreparacion, porcion: dto.porcion, titulo: dto.titulo},
     });
 
     const res: ResponseUpdateRecetaDto = {
@@ -231,7 +231,7 @@ const now = new Date();
 const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
     const recetaDeleted = await this.prisma.receta.update({
       where: { recetaId: idReceta },
-      data: { fechaBaja: localDate, usuarioBaja: dto.usuarioBaja, estatus: 'BA' },
+      data: { fechaBaja: localDate, UsuarioBaja: dto.usuarioBaja, estatus: 'BA' },
     });
 
  const res: ResponseDeleteRecetaDto= {

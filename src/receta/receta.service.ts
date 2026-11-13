@@ -1,17 +1,18 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { ApiResponse } from "src/global/response/response";
 import { PrismaService } from "src/prisma/prisma.service";
 
 import { CreateRecetaDto, ResponseCreateRecetaDto } from "./dto/create_receta_dto";
 import { ResponseUpdateRecetaDto, UpdateRecetaDto } from "./dto/update_receta_dto";
 import { DeleteRecetaDto, ResponseDeleteRecetaDto } from "./dto/delete-receta.dto";
+import { CloudinaryService } from "src/cloudinary/cloudinary.service";
 
 @Injectable()
 export class RecetaService {
-  constructor(private prisma: PrismaService) { }
-  async getRecetasAc(): Promise<ApiResponse<any[]>> {
-    try {
- const rol = await this.prisma.receta.findMany({
+  constructor(private prisma: PrismaService, private cloudinaryService: CloudinaryService) { }
+async getRecetasAc(): Promise<ApiResponse<any[]>> {
+  try {
+    const rol = await this.prisma.receta.findMany({
       where: { estatus: 'AC' },
       select: {
         recetaId: true,
@@ -19,10 +20,17 @@ export class RecetaService {
         usuarioIdFK: true,
         fechaDeCreacion: true,
         estatus: true,
+        Imagen: {
+          select: {
+            imagenId: true,
+            url: true,
+            tipo: true,
+            assetId: true,
+          },
+        },
       },
     });
 
-  
     if (!rol || rol.length === 0) {
       return {
         status: 404,
@@ -36,12 +44,10 @@ export class RecetaService {
       message: 'Recetas obtenidas correctamente',
       data: rol,
     };
-    }
-      catch (err) {
-
-      throw err;
-    }
+  } catch (err) {
+    throw err;
   }
+}
 
     async getRecetasBa(): Promise<ApiResponse<any[]>> {
     try {
@@ -53,6 +59,14 @@ export class RecetaService {
         usuarioIdFK: true,
         fechaDeCreacion: true,
         estatus: true,
+        Imagen: {
+          select: {
+            imagenId: true,
+            url: true,
+            tipo: true,
+            assetId: true,
+          },
+        },
       },
     });
 
@@ -130,22 +144,44 @@ async getRecetasByiD(id: number): Promise<ApiResponse<any>> {
   }
 }
 
- async createReceta(
+
+
+
+async createReceta(
   idUser: number,
   dto: CreateRecetaDto,
+  file: Express.Multer.File,
+  nombreCompleto: string,
 ): Promise<ApiResponse<ResponseCreateRecetaDto>> {
+
+  const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+
+  const now = new Date();
+  const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+
+  // Verificar usuario
+  const userExists = await this.prisma.usuario.findUnique({
+    where: { usuarioId: idUser },
+  });
+
+  if (!userExists) {
+    throw new NotFoundException('Usuario no encontrado');
+  }
+
+  let imagenId: number | null = null;
+
+
+  if (file) {
+    const imagenCreated = await this.cloudinaryService.uploadAndSaveImage(
+      file,
+      idUser,
+    );
+
+    imagenId = imagenCreated.imagenId;
+  }
+
+
   try {
-   const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
-
-const now = new Date();
-const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
-
-    const userExists = await this.prisma.usuario.findUnique({
-      where: { usuarioId: idUser },
-    });
-    if (!userExists) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
     const recetaCreated = await this.prisma.receta.create({
       data: {
         usuarioIdFK: idUser,
@@ -154,32 +190,50 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
         porcion: dto.porcion,
         titulo: dto.titulo,
         fechaDeCreacion: localDate,
-        UsuarioAlta: dto.usuarioAlta,
+        UsuarioAlta: nombreCompleto,
+        imagenIdFK: imagenId,
       },
     });
 
-      
-        const res: ResponseCreateRecetaDto = {
-          recetaId: recetaCreated.recetaId,
-         usuarioId: recetaCreated.usuarioIdFK,
-          titulo: recetaCreated.titulo,
-          descripcion: recetaCreated.descripcion,
-          tiempoPreparacion: recetaCreated.tiempoPreparacion,
-          porcion: recetaCreated.porcion,
-          fechaDeCreacion: recetaCreated.fechaDeCreacion!,
-          usuarioAlta: recetaCreated.UsuarioAlta!,
-          estatus: recetaCreated.estatus!,
-        };
+
+    const res: ResponseCreateRecetaDto = {
+      recetaId: recetaCreated.recetaId,
+      usuarioId: recetaCreated.usuarioIdFK,
+      titulo: recetaCreated.titulo,
+      descripcion: recetaCreated.descripcion,
+      tiempoPreparacion: recetaCreated.tiempoPreparacion,
+      porcion: recetaCreated.porcion,
+      fechaDeCreacion: recetaCreated.fechaDeCreacion!,
+      usuarioAlta: recetaCreated.UsuarioAlta!,
+      estatus: recetaCreated.estatus!,
+    };
+
     return {
       status: 201,
       message: 'Receta creada correctamente',
       data: res,
     };
-  } catch (err) {
-    throw err;
+
+  } catch (error) {
+
+    // Si falla la receta, eliminar también la imagen
+    if (imagenId !== null) {
+      const imagen = await this.prisma.imagen.findUnique({
+        where: { imagenId },
+      });
+
+      if (imagen?.assetId) {
+        await this.cloudinaryService.deleteImage(imagen.assetId);
+      }
+
+      await this.prisma.imagen.delete({
+        where: { imagenId },
+      });
+    }
+
+    throw error;
   }
 }
-
 async updateReceta(
   idReceta: number,
   dto: UpdateRecetaDto,
@@ -221,35 +275,119 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
   }
 }
 
-
-  async deleteReceta(idReceta: number, dto:DeleteRecetaDto): Promise<ApiResponse<ResponseDeleteRecetaDto>> {
+async activarReceta(
+  idReceta: number,
+  usuarioAlta: string,
+): Promise<ApiResponse<ResponseUpdateRecetaDto>> {
   try {
-
-          const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
-
-const now = new Date();
-const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
-    const recetaDeleted = await this.prisma.receta.update({
+    // 1. Buscar la receta
+    const receta = await this.prisma.receta.findUnique({
       where: { recetaId: idReceta },
-      data: { fechaBaja: localDate, UsuarioBaja: dto.usuarioBaja, estatus: 'BA' },
     });
 
- const res: ResponseDeleteRecetaDto= {
-    recetaId: recetaDeleted.recetaId,
-    usuarioId: recetaDeleted.usuarioIdFK,
-    titulo: recetaDeleted.titulo,
-    descripcion: recetaDeleted.descripcion,
-    tiempoPreparacion: recetaDeleted.tiempoPreparacion,
-    porcion: recetaDeleted.porcion,
-    fechaBaja: recetaDeleted.fechaBaja!,
-    usuarioBaja: recetaDeleted.UsuarioBaja!,
-    estatus: recetaDeleted.estatus!,
-  };
+
+    if (!receta) {
+      throw new NotFoundException('La receta no existe');
+    }
+
+
+    if (receta.estatus === 'AC') {
+      throw new ConflictException('La receta ya está da activa');
+    }
+
+    const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+
+    const now = new Date();
+    const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+
+   
+    const recetaDeleted = await this.prisma.receta.update({
+      where: { recetaId: idReceta },
+      data: {
+        UsuarioMod: usuarioAlta,
+        fechaMod: localDate,
+        estatus: 'AC',
+      },
+    });
+
+    // 5. Preparar respuesta
+    const res: ResponseUpdateRecetaDto = {
+      recetaId: recetaDeleted.recetaId,
+      usuarioId: recetaDeleted.usuarioIdFK,
+      titulo: recetaDeleted.titulo,
+      descripcion: recetaDeleted.descripcion,
+      tiempoPreparacion: recetaDeleted.tiempoPreparacion,
+      porcion: recetaDeleted.porcion,
+      fechaMod: recetaDeleted.fechaMod!,
+      usuarioMod: recetaDeleted.UsuarioMod!,
+      estatus: recetaDeleted.estatus!,
+    };
+
     return {
       status: 200,
-      message: 'Receta eliminada correctamente',
+      message: 'La receta se activó correctamente',
       data: res,
     };
+
+  } catch (err) {
+    throw err;
+  }
+}
+
+async deleteReceta(
+  idReceta: number,
+  usuarioBaja: string,
+): Promise<ApiResponse<ResponseDeleteRecetaDto>> {
+  try {
+    // 1. Buscar la receta
+    const receta = await this.prisma.receta.findUnique({
+      where: { recetaId: idReceta },
+    });
+
+
+    if (!receta) {
+      throw new NotFoundException('La receta no existe');
+    }
+
+
+    if (receta.estatus === 'BA') {
+      throw new ConflictException('La receta ya está dada de baja');
+    }
+
+    const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+
+    const now = new Date();
+    const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+
+   
+    const recetaDeleted = await this.prisma.receta.update({
+      where: { recetaId: idReceta },
+      data: {
+        UsuarioBaja: usuarioBaja,
+        fechaBaja: localDate,
+        estatus: 'BA',
+      },
+    });
+
+    // 5. Preparar respuesta
+    const res: ResponseDeleteRecetaDto = {
+      recetaId: recetaDeleted.recetaId,
+      usuarioId: recetaDeleted.usuarioIdFK,
+      titulo: recetaDeleted.titulo,
+      descripcion: recetaDeleted.descripcion,
+      tiempoPreparacion: recetaDeleted.tiempoPreparacion,
+      porcion: recetaDeleted.porcion,
+      fechaBaja: recetaDeleted.fechaBaja!,
+      usuarioBaja: recetaDeleted.UsuarioBaja!,
+      estatus: recetaDeleted.estatus!,
+    };
+
+    return {
+      status: 200,
+      message: 'La receta se dio de baja correctamente',
+      data: res,
+    };
+
   } catch (err) {
     throw err;
   }

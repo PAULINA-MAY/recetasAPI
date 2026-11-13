@@ -19,16 +19,13 @@ model Comentario {
 
 model Imagen {
   imagenId        Int       @id(map: "PK__Imagen__494B286B16F8F3A2") @default(autoincrement())
-  usuarioFKId     Int?
-  recetaIdFK      Int?
-  pasoIdFK        Int?
   url             String    @db.Text
   tipo            String    @db.VarChar(100)
   fechaDeCreacion DateTime? @default(now(), map: "DF__Imagen__fechaDeC__5CD6CB2B") @db.DateTime
   assetId         String?   @db.NVarChar(Max)
-  Paso            Paso?     @relation(fields: [pasoIdFK], references: [PasoId], onUpdate: NoAction, map: "FK__Imagen__pasoIdFK__5FB337D6")
-  Receta          Receta?   @relation(fields: [recetaIdFK], references: [recetaId], onUpdate: NoAction, map: "FK__Imagen__recetaId__5EBF139D")
-  Usuario         Usuario?  @relation(fields: [usuarioFKId], references: [usuarioId], onUpdate: NoAction, map: "FK__Imagen__usuarioF__5DCAEF64")
+  Paso            Paso[]
+  Receta          Receta[]
+  Usuario         Usuario[]
 }
 
 model Ingrediente {
@@ -45,8 +42,10 @@ model Paso {
   recetaIngredienteIdFK Int
   numeroPaso            Int
   descripcion           String            @db.Text
-  Imagen                Imagen[]
+  estatus               String            @default("AC", map: "DF_Paso_estatus") @db.VarChar(2)
+  imagenIdFK            Int?
   RecetaIngrediente     RecetaIngrediente @relation(fields: [recetaIngredienteIdFK], references: [recetaIngredienteId], onUpdate: NoAction, map: "FK__Paso__recetaIngr__59FA5E80")
+  Imagen                Imagen?           @relation(fields: [imagenIdFK], references: [imagenId], onDelete: NoAction, onUpdate: NoAction, map: "FK_Paso_Imagen")
 }
 
 model Puntuacion {
@@ -73,8 +72,9 @@ model Receta {
   UsuarioMod         String?             @default("", map: "DF_Receta_UsuarioMod") @db.VarChar(100)
   fechaMod           DateTime?           @default(dbgenerated("1999-04-08 15:00:00.000"), map: "DF_Receta_fechaMod") @db.DateTime
   estatus            String?             @default("AC", map: "DF_Receta_estatus") @db.VarChar(25)
-  Imagen             Imagen[]
+  imagenIdFK         Int?
   Usuario            Usuario             @relation(fields: [usuarioIdFK], references: [usuarioId], onUpdate: NoAction, map: "FK__Receta__usuarioI__5441852A")
+  Imagen             Imagen?             @relation(fields: [imagenIdFK], references: [imagenId], onDelete: NoAction, onUpdate: NoAction, map: "FK_Receta_Imagen")
   recetaIngredientes RecetaIngrediente[]
 }
 
@@ -118,9 +118,10 @@ model Usuario {
   UsuarioMod      String?      @default("", map: "DF_Usuario_UsuarioMod") @db.VarChar(100)
   fechaMod        DateTime?    @default(dbgenerated("1999-04-08 15:00:00.000"), map: "DF_Usuario_fechaMod") @db.DateTime
   estatus         String?      @default("AC", map: "DF_Usuario_estatus") @db.VarChar(25)
+  imagenIdFK      Int?
   Comentario      Comentario[]
-  Imagen          Imagen[]
   Puntuacion      Puntuacion[]
   Receta          Receta[]
   Rol             Rol          @relation(fields: [rolIdFK], references: [rolId], onUpdate: NoAction, map: "FK__Usuario__rolIdFK__4D94879B")
+  Imagen          Imagen?      @relation(fields: [imagenIdFK], references: [imagenId], onDelete: NoAction, onUpdate: NoAction, map: "FK_Usuario_Imagen")
 }

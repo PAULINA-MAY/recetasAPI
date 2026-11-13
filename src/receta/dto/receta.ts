@@ -1,5 +1,14 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsInt, IsNotEmpty, IsPositive, IsString } from "class-validator";
+import { ApiProperty, OmitType } from "@nestjs/swagger";
+import { Type } from "class-transformer";
+import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, ValidateNested } from "class-validator";
+import { ImagenDto } from "src/cloudinary/dto/imagen";
+
+
+
+/* export class ImagenRecetaDto extends OmitType(
+  ImagenDto,
+  ['imagenId', 'assetId'] as const,
+) {} */
 
 export class RecetaDto {
         @ApiProperty({
@@ -34,24 +43,25 @@ export class RecetaDto {
     @IsNotEmpty()
     tiempoPreparacion: string;
 
-    @ApiProperty({
-        example: 4,
-    })
-    @IsInt()
-    @IsPositive()
-    porcion: number;
+@ApiProperty({ example: 4 })
+@Type(() => Number)
+@IsInt()
+@IsPositive()
+porcion: number;
 
     @ApiProperty({
         example: '2025-01-01T12:00:00Z',
         required: false,
     })
 
-    @ApiProperty({ example: 'SYSTEM', required: false })
+    @ApiProperty({ example: '2026-04-08T12:00:00.000Z', required: false })
  @IsNotEmpty({ message: 'El usuario de alta es requerido' })
   usuarioAlta: string;
     
+
+       @ApiProperty({ example: 'SYSTEM', required: false })
     @IsDateString()
-    fechaDeCreacion?: Date;
+    fechaDeCreacion: Date;
 
     @ApiProperty({ example: '2026-04-08T12:00:00.000Z', required: false })
    @IsNotEmpty({ message: 'La fecha de modificación es requerida' })
@@ -73,4 +83,18 @@ export class RecetaDto {
      @ApiProperty({ example: 'estatus', required: false })
        @IsNotEmpty({ message: 'El estatus es requerido' })
   estatus: string;
+
+/* 
+@ApiProperty({
+  type: () => ImagenRecetaDto,
+  required: false,
+})
+
+@IsOptional()
+@ValidateNested()
+@Type(() => ImagenRecetaDto)
+imagen?: ImagenRecetaDto; */
+
+
 }
+

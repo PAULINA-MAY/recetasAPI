@@ -8,25 +8,30 @@ import { ImagenDto } from './dto/imagen';
 @Injectable()
 export class CloudinaryService {
       constructor(private prisma: PrismaService) { }
-  uploadFile(file: Express.Multer.File): Promise<CloudinaryResponse> {
+uploadFile(file: Express.Multer.File): Promise<CloudinaryResponse> {
+    if (!file) {
+      throw new BadRequestException('No se envió ningún archivo');
+    }
+
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { resource_type: 'auto', folder: 'images'},
-        
+        {
+          resource_type: 'auto',
+          folder: 'images',
+        },
         (error, result) => {
           if (error) return reject(error);
+          if (!result) return reject(new Error('Error al subir imagen'));
+
           resolve(result as CloudinaryResponse);
         },
       );
 
       streamifier.createReadStream(file.buffer).pipe(uploadStream);
-
-      
-
     });
   }
 
-  async uploadPdf(file: Express.Multer.File) {
+async uploadPdf(file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('No se envió ningún archivo');
     }
@@ -44,6 +49,8 @@ export class CloudinaryService {
         },
         (error, result) => {
           if (error) return reject(error);
+          if (!result) return reject(new Error('Error al subir PDF'));
+
           resolve(result);
         },
       );
@@ -52,49 +59,75 @@ export class CloudinaryService {
     });
   }
 
-async uploadAndSaveImage(
-  file: Express.Multer.File,
-  usuarioFkId?: number,
-  recetaFkId?: number,
-  pasoIdFk?: number,
-) {
-  let cloudinaryResult: CloudinaryResponse | null = null;
 
-  try {
-    //  Subir a Cloudinary
-    cloudinaryResult = await this.uploadFile(file);
-    // Construir DTO
-    const imagenDto: ImagenDto = {
-      usuarioFkId,
-      recetaFkId,
-      pasoIdFk,
-      url: cloudinaryResult.secure_url,
-      tipo: cloudinaryResult.resource_type,
-      assetId: cloudinaryResult.public_id,
-    };
+  async uploadAndSaveImage(
+    file: Express.Multer.File,
+    usuarioFkId?: number,
+    recetaFkId?: number,
+    pasoIdFk?: number,
+  ) {
+    let cloudinaryResult: CloudinaryResponse | null = null;
 
-    //  Construir data dinámicamente
-    const data: any = {
-url: imagenDto.url,
-  tipo: imagenDto.tipo,
-  assetId: cloudinaryResult.public_id,
-    };
+    try {
+   
+      cloudinaryResult = await this.uploadFile(file);
 
-if (imagenDto.usuarioFkId !== undefined) data.Usuario = { connect: { usuarioId: imagenDto.usuarioFkId } };
-if (imagenDto.recetaFkId !== undefined) data.Receta = { connect: { recetaId: imagenDto.recetaFkId } };
-if (imagenDto.pasoIdFk !== undefined) data.Paso = { connect: { PasoId: imagenDto.pasoIdFk } };
+     
+      const data: any = {
+        url: cloudinaryResult.secure_url,
+        tipo: cloudinaryResult.resource_type,
+        assetId: cloudinaryResult.public_id,
+      };
 
-    //  Guardar en BD
-    const image = await this.prisma.imagen.create({ data });
+      // Relaciones opcionales
+      if (usuarioFkId !== undefined) {
+        data.Usuario = {
+          connect: { usuarioId: usuarioFkId },
+        };
+      }
 
-    return image;
-  } catch (error) {
-    //  Rollback Cloudinary
-    if (cloudinaryResult?.public_id) {
-      await cloudinary.uploader.destroy(cloudinaryResult.public_id);
+      if (recetaFkId !== undefined) {
+        data.Receta = {
+          connect: { recetaId: recetaFkId },
+        };
+      }
+
+      if (pasoIdFk !== undefined) {
+        data.Paso = {
+          connect: { PasoId: pasoIdFk },
+        };
+      }
+
+      // Guardar imagen en BD
+      const image = await this.prisma.imagen.create({
+        data,
+      });
+
+      return image;
+
+    } catch (error) {
+      // Eliminar imagen de Cloudinary si falla el guardado
+      if (cloudinaryResult?.public_id) {
+        await cloudinary.uploader.destroy(
+          cloudinaryResult.public_id,
+          { resource_type: cloudinaryResult.resource_type },
+        );
+      }
+
+      throw error;
     }
-    throw error;
   }
+
+  async deleteImage(assetId: string) {
+  if (!assetId) {
+    throw new BadRequestException('El assetId es requerido');
+  }
+
+  const result = await cloudinary.uploader.destroy(assetId, {
+    resource_type: 'image',
+  });
+
+  return result;
 }
 
 

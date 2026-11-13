@@ -19,9 +19,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     //valida que haya precencia del correo en el payload del token y sea unico
-    async validate(payload: { correo: string }) {
+    async validate(payload: any) {
         return this.prisma.usuario.findUnique({
-            where: { correo: payload.correo }
+            where: { correo: payload.correo, nombreCompleto: payload.nombreCompleto }
         });
     
     }

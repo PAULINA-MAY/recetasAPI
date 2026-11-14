@@ -1,7 +1,7 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { UsuariosDto } from './usuarios.dto';
 
-export class CreateUsuariosDto extends OmitType(UsuariosDto, ['usuarioId', 'fechaDeCreacion', 'rolIdFK', 'fechaMod', 'usuarioMod', 'fechaBaja', 'usuarioBaja', 'estatusAC', 'estatusBA', 'estatus'] as const) {
+export class CreateUsuariosDto extends OmitType(UsuariosDto, ['usuarioId', 'fechaDeCreacion', 'rolIdFK', 'fechaMod', 'usuarioMod', 'fechaBaja', 'usuarioBaja', 'estatusAC', 'estatusBA', 'estatus', 'usuarioAlta'] as const) {
 
 }
 

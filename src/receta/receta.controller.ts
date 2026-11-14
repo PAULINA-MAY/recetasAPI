@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/guard/auth/auth.guard";
 import { RecetaService } from "./receta.service";
@@ -78,12 +78,49 @@ createReceta(
   return this.recetaService.createReceta(idUser, dto, file,  req.user.nombreCompleto,);
 }
 
-    @Put(':idReceta')
-    @ApiOperation({ summary: 'Actualizar una receta por ID' })
-    @ApiOkResponse({ type: ResponseUpdateRecetaDto, description: 'Receta actualizada' })
-    updateReceta(@Param('idReceta', ParseIntPipe) idReceta: number, dto: UpdateRecetaDto) {
-        return this.recetaService.updateReceta(idReceta, dto);
-    }
+
+
+@Put(':idReceta')
+@UseInterceptors(FileInterceptor('file'))
+@ApiOperation({ summary: 'Actualizar una receta por ID' })
+@ApiConsumes('multipart/form-data')
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      titulo: { type: 'string', example: 'Pasta roja' },
+      descripcion: {
+        type: 'string',
+        example: 'Pasta roja con salsa de tomate y albahaca',
+      },
+      tiempoPreparacion: { type: 'string', example: '01:30:00' },
+      porcion: { type: 'number', example: 4 },
+      file: {
+        type: 'string',
+        format: 'binary',
+      },
+    },
+  },
+})
+@ApiOkResponse({
+  type: ResponseUpdateRecetaDto,
+  description: 'Receta actualizada',
+})
+updateReceta(
+  @Param('idReceta', ParseIntPipe) idReceta: number,
+  @Body() dto: UpdateRecetaDto,
+  @UploadedFile() file: Express.Multer.File,
+  @Request() req,
+) {
+  return this.recetaService.updateReceta(
+    idReceta,
+    dto,
+    file,
+    req.user.nombreCompleto,
+  );
+}
+
+
 
 @Patch(':idReceta/baja')
 async deleteReceta(

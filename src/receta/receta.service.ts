@@ -234,46 +234,107 @@ async createReceta(
     throw error;
   }
 }
+
+
 async updateReceta(
-  idReceta: number,
+ idReceta: number,
   dto: UpdateRecetaDto,
+  file: Express.Multer.File,
+  nombreCompleto: string,
+   
 ): Promise<ApiResponse<ResponseUpdateRecetaDto>> {
+
+  const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+
+  const now = new Date();
+  const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+
   try {
 
-        const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
-
-const now = new Date();
-const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
-
-    const recetaUpdated = await this.prisma.receta.update({
-      where: { recetaId: idReceta, estatus: 'AC' },
-      data: {  fechaMod: localDate , UsuarioMod: dto.usuarioMod, descripcion: dto.descripcion, tiempoPreparacion: dto.tiempoPreparacion, porcion: dto.porcion, titulo: dto.titulo},
+    // 1. Verificar que la receta exista y esté activa
+    const recetaExists = await this.prisma.receta.findFirst({
+      where: {
+        recetaId: idReceta,
+        estatus: 'AC',
+      },
+      include: {
+        Imagen: true,
+      },
     });
 
+    if (!recetaExists) {
+      throw new NotFoundException('Receta no encontrada');
+    }
+
+    // 2. Preparar los datos de actualización
+    const dataUpdate: any = {
+      fechaMod: localDate,
+      UsuarioMod: nombreCompleto,
+      descripcion: dto.descripcion,
+      tiempoPreparacion: dto.tiempoPreparacion,
+      porcion: dto.porcion,
+      titulo: dto.titulo,
+    };
+
+    // 3. Verificar si el cliente envió una imagen
+    if (file) {
+
+      // 4. Verificar si la receta ya tiene una imagen
+      if (recetaExists.imagenIdFK !== null) {
+
+        // Ya tiene imagen: reemplazar la imagen existente
+        await this.cloudinaryService.updateImage(
+          recetaExists.Imagen!.assetId!,
+          file,
+        );
+
+      } else {
+
+        // No tiene imagen: subir y guardar una nueva
+        const imagenCreated =
+          await this.cloudinaryService.uploadAndSaveImage(
+            file,
+            recetaExists.usuarioIdFK,
+          );
+
+        // Relacionar la nueva imagen con la receta
+        dataUpdate.imagenIdFK = imagenCreated.imagenId;
+      }
+    }
+
+    // 5. Actualizar la receta
+    const recetaUpdated = await this.prisma.receta.update({
+      where: {
+        recetaId: idReceta,
+      },
+      data: dataUpdate,
+    });
+
+    // 6. Construir respuesta
     const res: ResponseUpdateRecetaDto = {
-        recetaId: recetaUpdated.recetaId,
-        usuarioId: recetaUpdated.usuarioIdFK,
-        titulo: recetaUpdated.titulo,
-        descripcion: recetaUpdated.descripcion,
-        tiempoPreparacion: recetaUpdated.tiempoPreparacion,
-        porcion: recetaUpdated.porcion,
-        fechaMod: recetaUpdated.fechaMod!,
-        usuarioMod: recetaUpdated.UsuarioMod!,
-        estatus: recetaUpdated.estatus!,
-      };
-
-   
-
+      recetaId: recetaUpdated.recetaId,
+      usuarioId: recetaUpdated.usuarioIdFK,
+      titulo: recetaUpdated.titulo,
+      descripcion: recetaUpdated.descripcion,
+      tiempoPreparacion: recetaUpdated.tiempoPreparacion,
+      porcion: recetaUpdated.porcion,
+      fechaMod: recetaUpdated.fechaMod!,
+      usuarioMod: recetaUpdated.UsuarioMod!,
+      estatus: recetaUpdated.estatus!,
+    };
 
     return {
       status: 200,
       message: 'Receta actualizada correctamente',
       data: res,
     };
+
   } catch (err) {
     throw err;
   }
 }
+
+
 
 async activarReceta(
   idReceta: number,

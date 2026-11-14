@@ -5,10 +5,6 @@ import { ImagenDto } from "src/cloudinary/dto/imagen";
 
 
 
-/* export class ImagenRecetaDto extends OmitType(
-  ImagenDto,
-  ['imagenId', 'assetId'] as const,
-) {} */
 
 export class RecetaDto {
         @ApiProperty({
@@ -83,18 +79,6 @@ porcion: number;
      @ApiProperty({ example: 'estatus', required: false })
        @IsNotEmpty({ message: 'El estatus es requerido' })
   estatus: string;
-
-/* 
-@ApiProperty({
-  type: () => ImagenRecetaDto,
-  required: false,
-})
-
-@IsOptional()
-@ValidateNested()
-@Type(() => ImagenRecetaDto)
-imagen?: ImagenRecetaDto; */
-
 
 }
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CloudinaryResponse } from 'src/global/cloudinary.response';
 import { v2 as cloudinary } from 'cloudinary';
 import * as streamifier from 'streamifier';
@@ -129,6 +129,70 @@ async uploadPdf(file: Express.Multer.File) {
 
   return result;
 }
+
+
+
+async updateImage(
+  assetId: string,
+  file: Express.Multer.File,
+) {
+  if (!assetId) {
+    throw new BadRequestException('El assetId es requerido');
+  }
+
+  if (!file) {
+    throw new BadRequestException('No se envió ningún archivo');
+  }
+
+  // Buscar imagen existente en BD
+  const imagenExists = await this.prisma.imagen.findFirst({
+    where: { assetId },
+  });
+
+  if (!imagenExists) {
+    throw new NotFoundException('Imagen no encontrada');
+  }
+
+  // Reemplazar imagen en Cloudinary conservando el mismo public_id
+  const cloudinaryResult: CloudinaryResponse = await new Promise(
+    (resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          public_id: assetId,
+          overwrite: true,
+          invalidate: true,
+          resource_type: 'image',
+        },
+        (error, result) => {
+          if (error) return reject(error);
+
+          if (!result) {
+            return reject(new Error('Error al actualizar imagen'));
+          }
+
+          resolve(result as CloudinaryResponse);
+        },
+      );
+
+      streamifier.createReadStream(file.buffer).pipe(uploadStream);
+    },
+  );
+
+  // Actualizar registro existente en Prisma
+  const imagenUpdated = await this.prisma.imagen.update({
+    where: {
+      imagenId: imagenExists.imagenId,
+    },
+    data: {
+      url: cloudinaryResult.secure_url,
+      tipo: cloudinaryResult.resource_type,
+      assetId: cloudinaryResult.public_id,
+    },
+  });
+
+  return imagenUpdated;
+}
+
 
 
    }

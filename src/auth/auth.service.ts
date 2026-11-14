@@ -51,7 +51,7 @@ const usuario = await this.prisma.usuario.findUnique({
     }
   }
 
-  async registro(dto: CreateUsuariosDto):Promise<any> {
+  async registro(  usuarioAlta: string,dto: CreateUsuariosDto):Promise<any> {
     try {
 
     const salt = await bcrypt.genSalt();
@@ -60,7 +60,7 @@ const usuario = await this.prisma.usuario.findUnique({
    dto.nombreCompleto,
     dto.correo,
    hashedPassword,
-   dto.usuarioAlta
+   usuarioAlta
   );   
       return usuario;
     } catch (err) {

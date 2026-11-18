@@ -3,8 +3,8 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swa
 import { JwtAuthGuard } from 'src/guard/auth/auth.guard';
 import { PuntuacionDto } from './dto/puntuacion.dto';
 import { PuntuacionService } from './puntuacion.service';
-import { CreatePuntuacionDto } from './dto/createPuntuacion.dto';
-import { UpdatePuntuacionDto } from './dto/updatePuntuacion.dto';
+import { CreatePuntuacionDto, ResponseCreatePuntuacionDto } from './dto/createPuntuacion.dto';
+import { ResponseUpdatePuntuacionDto, UpdatePuntuacionDto } from './dto/updatePuntuacion.dto';
 
 
 @ApiTags('puntuacion')
@@ -18,7 +18,7 @@ export class PuntuacionController {
 
     @Get(':recetaId')
     @ApiOperation({ summary: 'Obtener todas las puntuaciones por receta' })
-  @ApiOkResponse({ type: [PuntuacionDto], description: 'Lista de puntuaciones para una receta' })
+  @ApiOkResponse({ type: [ResponseCreatePuntuacionDto], description: 'Lista de puntuaciones para una receta' })
   getAllPuntuaciones(
       @Req() req,
     @Param('recetaId', ParseIntPipe) recetaId: number){
@@ -27,7 +27,7 @@ export class PuntuacionController {
 
     @Get(':puntuacionId/puntuacionById')
     @ApiOperation({ summary: 'Obtener una puntuación por ID' })
-  @ApiOkResponse({ type: PuntuacionDto, description: 'Detalles de la puntuación' })
+  @ApiOkResponse({ type: ResponseCreatePuntuacionDto, description: 'Detalles de la puntuación' })
   getPuntuacionById(
     @Param('puntuacionId', ParseIntPipe) puntuacionId: number){
     return this.puntuacionService.getPuntuation(puntuacionId);
@@ -35,7 +35,7 @@ export class PuntuacionController {
 
 @Post(':recetaId/:idUsuario')
     @ApiOperation({ summary: 'Crear una nueva puntuación para una receta' })
-  @ApiOkResponse({ type: PuntuacionDto, description: 'Puntuación creada exitosamente' })  
+  @ApiOkResponse({ type: ResponseCreatePuntuacionDto, description: 'Puntuación creada exitosamente' })  
 createPuntuacion(
   @Param('recetaId', ParseIntPipe) recetaId: number,
     @Param('idUsuario', ParseIntPipe) idUsuario: number,
@@ -44,9 +44,9 @@ createPuntuacion(
   return this.puntuacionService.createPuntuacion(recetaId, idUsuario, dto);
 }
 
-@Put(':recetaId/:idUsuario/update')
+@Put(':recetaId/:idUsuario/actualizar')
     @ApiOperation({ summary: 'Actualizar una puntuación existente para una receta' })
-  @ApiOkResponse({ type: PuntuacionDto, description: 'Puntuación actualizada exitosamente' })  
+  @ApiOkResponse({ type: ResponseUpdatePuntuacionDto, description: 'Puntuación actualizada exitosamente' })  
 updatePuntuacion(
   @Param('recetaId', ParseIntPipe) recetaId: number,
     @Param('idUsuario', ParseIntPipe) idUsuario: number,
@@ -54,6 +54,10 @@ updatePuntuacion(
 ){
  return this.puntuacionService.updatePuntuacion(recetaId, idUsuario, dto);
 }
+
+
+
+
 
  
 

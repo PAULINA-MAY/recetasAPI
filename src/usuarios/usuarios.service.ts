@@ -1,4 +1,4 @@
-import { ConflictException, Get, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, Get, Injectable, NotFoundException } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 import { PrismaService } from "src/prisma/prisma.service";
@@ -14,6 +14,27 @@ import { DeleteUsuarioDto, ResponseDeleteUsuarioDto } from "./dto/delete-usuario
 export class UsuariosService {
 
     constructor(private prisma: PrismaService) { }
+
+    async getAllUsuarios(): Promise<ApiResponse<any>> {
+     try{
+      const usuarios = await this.prisma.usuario.findMany();
+
+      if (!usuarios || usuarios.length === 0) {
+        throw new NotFoundException('No se encontraron usuarios');
+      } else {
+        return {
+          status: 200,
+          message: 'Usuarios obtenidos correctamente',
+          data: usuarios,
+        };
+      }
+
+     } catch(err){
+        throw err;
+     }
+
+
+    }
 async getUsuariosAc(): Promise<ApiResponse<any[]>> {
     try {
  const usuarios = await this.prisma.usuario.findMany({
@@ -238,42 +259,97 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
             throw err;
         }
     }
-    async deleteUsuario(idUsuario: number, dto: DeleteUsuarioDto): Promise<ApiResponse<any[]>> {
-        try {
-            const usuario = await this.prisma.usuario.findUnique({
-                where: { usuarioId: idUsuario },
-            });
-            // Verificar si el usuario existe
-            if (!usuario) {
-                throw new NotFoundException('Usuario no encontrado');
-            }
 
-                  const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+  async activarUsuario(idUsuario: number, usuarioMod: string):Promise<ApiResponse<ResponseUpdateUsuarioDto[]>>   {
+  
+         const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+    const now = new Date();
+    const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+    const user = await this.prisma.usuario.findUnique({
+      where: { usuarioId: idUsuario },
+    });
 
-const now = new Date();
-const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
-
-            const userBaja = await this.prisma.usuario.update({ where: { usuarioId: idUsuario }, data: { estatus: 'BA', UsuarioBaja: dto.usuarioBaja, fechaBaja: localDate } });
-            const res: ResponseDeleteUsuarioDto = {
-                usuarioId: userBaja.usuarioId ,
-                rolIdFK: userBaja.rolIdFK,
-                nombreCompleto: userBaja.nombreCompleto,
-                correo: userBaja.correo,
-                usuarioBaja: userBaja.UsuarioBaja!,
-                fechaBaja: userBaja.fechaBaja!,
-                estatus: userBaja.estatus!,
-              };
-            return {
-                status: 200,
-                message: 'Usuario eliminado correctamente',
-                data: [res],
-            };
-        } catch (err) {
-            throw err;
-        }
+    if (!user) {
+      throw new NotFoundException('El usuario no existe');
     }
 
+    if (user.estatus === 'AC') {
+      throw new BadRequestException('El usuario ya está activo');
+    }
 
+    
+
+    const userUpdated = await this.prisma.usuario.update({
+      where: { usuarioId: idUsuario },
+      data: {
+        estatus: 'AC',
+        fechaMod: localDate,
+        UsuarioMod: usuarioMod,
+      },
+    });
+
+    const res: ResponseUpdateUsuarioDto = {
+      usuarioId: userUpdated.usuarioId,
+      rolIdFK: userUpdated.rolIdFK,
+      nombreCompleto: userUpdated.nombreCompleto,
+      correo: userUpdated.correo,
+      usuarioMod: userUpdated.UsuarioMod!,
+      fechaMod: userUpdated.fechaMod!,
+      estatus: userUpdated.estatus!,
+    };
+
+    return {
+      status: 200,
+      message: 'Usuario activado correctamente',
+      data: [res],
+    };
+
+  }
+
+  async deleteUsuario(idUsuario: number, usuarioMod: string): Promise<ApiResponse<ResponseUpdateUsuarioDto[]>> {
+    const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+    const now = new Date();
+    const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+
+    const user = await this.prisma.usuario.findUnique({
+      where: { usuarioId: idUsuario },
+    });
+
+    if(user) {
+  throw new NotFoundException('El usuario no existe');
+    }
+
+    if(user!.estatus === 'BA') {
+  throw new BadRequestException('El usuario ya está dado de baja');
+    }
+
+    const userUpdated = await this.prisma.usuario.update({
+      where: { usuarioId: idUsuario },
+      data: {
+        estatus: 'BA',
+        fechaMod: localDate,
+        UsuarioMod: usuarioMod,
+      },
+    });
+
+
+    const res: ResponseUpdateUsuarioDto = {
+      usuarioId: userUpdated.usuarioId,
+      rolIdFK: userUpdated.rolIdFK,
+      nombreCompleto: userUpdated.nombreCompleto,
+      correo: userUpdated.correo,
+      usuarioMod: userUpdated.UsuarioMod!,
+      fechaMod: userUpdated.fechaMod!,
+      estatus: userUpdated.estatus!,
+    };  
+
+    return {
+      status: 200,
+      message: 'Usuario dado de baja correctamente',
+      data: [res],
+    };
+
+      }
 
 
 }

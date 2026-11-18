@@ -5,7 +5,7 @@ import { RecetaDto } from "./receta";
 
 export class UpdateRecetaDto extends OmitType(RecetaDto, ['recetaId', 'usuarioAlta', 'usuarioId', 'fechaDeCreacion', 'fechaBaja', 'usuarioBaja', 'estatus', 'fechaMod', 'usuarioMod']) {}
 
-export class ResponseUpdateRecetaDto extends OmitType(RecetaDto, [ 'fechaDeCreacion', 'usuarioAlta',  'fechaBaja', 'usuarioBaja']) {}
+export class ResponseUpdateRecetaDto extends OmitType(RecetaDto, [ 'fechaDeCreacion', 'usuarioAlta',  'fechaBaja', 'usuarioBaja'] as const) {}
 
 
 

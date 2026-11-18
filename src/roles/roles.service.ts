@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 
 import { CreateRoleDto, ResponseCreateRoleDto } from "./dto/create-role.dto";
@@ -12,6 +12,27 @@ import { DeleteRoleDto, ResponseDeleteRoleDto } from "./dto/delete-role.dto";
 export class RolesService {
 
   constructor(private prisma: PrismaService) { }
+
+      async getAllRoles(): Promise<ApiResponse<any>> {
+     try{
+      const roles = await this.prisma.rol.findMany();
+
+      if (!roles || roles.length === 0) {
+        throw new NotFoundException('No se encontraron roles');
+      } else {
+        return {
+          status: 200,
+          message: 'Roles obtenidos correctamente',
+          data: roles,
+        };
+      }
+
+     } catch(err){
+        throw err;
+     }
+
+
+    }
 
   async getRolesAc(): Promise<ApiResponse<any[]>> {
     try {
@@ -111,7 +132,7 @@ async getRolesById(id: number): Promise<ApiResponse<ResponseCreateRoleDto>> {
   }
 }
 
-async createRole(dto: CreateRoleDto): Promise<ApiResponse<ResponseCreateRoleDto>> {
+async createRole(dto: CreateRoleDto, usuarioAlta: string): Promise<ApiResponse<ResponseCreateRoleDto>> {
 const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
 
 const now = new Date();
@@ -120,7 +141,7 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
   const createRole = await this.prisma.rol.create({
     data: {
       tipo: dto.tipo,
-      usuarioAlta: dto.usuarioAlta,
+      usuarioAlta: usuarioAlta,
       fechaDeCreacion: localDate,
     },
   });
@@ -141,7 +162,7 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
   };
 }
 
-  async updateRole(id: number, dto: UpdateRoleDto): Promise<ApiResponse<ResponseUpdateRoleDto[]>> {
+  async updateRole(id: number, dto: UpdateRoleDto, usuarioMod: string ): Promise<ApiResponse<ResponseUpdateRoleDto[]>> {
     try {
           const role = await this.prisma.rol.findUnique({
       where: { rolId: id},
@@ -163,7 +184,7 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
 
       const roleUpdated = await this.prisma.rol.update({
         where: { rolId: id },
-        data: { tipo: dto.tipo, usuarioMod: dto.usuarioMod, fechaMod: localDate},
+        data: { tipo: dto.tipo, usuarioMod: usuarioMod, fechaMod: localDate},
       });
 
 
@@ -184,41 +205,86 @@ const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
     }
   }
 
+async activarRole(id: number, usuarioAlta: string): Promise<ApiResponse<ResponseUpdateRoleDto[]>> {
 
-  async deleteRole(id: number, dto: DeleteRoleDto): Promise<ApiResponse<ResponseDeleteRoleDto[]>> {
-    try {
-
-       const roleRaw = await this.prisma.rol.findUnique({
+  try{
+    const role = await this.prisma.rol.findUnique({
       where: { rolId: id },
     });
 
-    if (!roleRaw) {
-      throw new NotFoundException('No se encontraron el rol');
+    if (!role) {
+      throw new NotFoundException('El rol no existe');
     }
-      const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+ if (role.estatus === 'AC') {
+          throw new ConflictException('El rol ya está activo');
+    }
+  
+    const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
 
-const now = new Date();
-const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
-      const roleDeleted = await this.prisma.rol.update({ where: { rolId: id }, data: { estatus: 'BA', usuarioBaja: dto.usuarioBaja, fechaBaja: localDate } });
-      const res: ResponseDeleteRoleDto = {
-    rolId: roleDeleted.rolId,
-    tipo: roleDeleted.tipo,
-    usuarioBaja: roleDeleted.usuarioBaja!,
-    fechaBaja: roleDeleted.fechaBaja!,
-    estatus: roleDeleted.estatus!,
-  };
-    
-      return {
-        status: 200,
-        message: 'Rol eliminado correctamente',
-        data: [res],
-      };
-    } catch (err) {
-      throw err;
+    const now = new Date();
+    const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+
+    const roleActivated = await this.prisma.rol.update({
+      where: { rolId: id },
+      data: { estatus: 'AC', usuarioAlta, fechaDeCreacion: localDate },
+    });
+
+    const res: ResponseUpdateRoleDto = {
+      rolId: roleActivated.rolId,
+      tipo: roleActivated.tipo,
+      usuarioMod: roleActivated.usuarioAlta!,
+      fechaMod: roleActivated.fechaDeCreacion!,
+      estatus: roleActivated.estatus!,
+    };
+    return {
+      status: 200,
+      message: 'Rol activado correctamente',
+      data: [res],
+    };
+  } catch (err) {
+    throw err;
+  }
+}   
+async deleteRole(id: number, usuarioBaja: string): Promise<ApiResponse<ResponseUpdateRoleDto[]>> {
+  try {
+    const role = await this.prisma.rol.findUnique({
+      where: { rolId: id },
+    });
+
+    if (!role) {
+      throw new NotFoundException('El rol no existe');
     }
+
+     if (role.estatus === 'BA') {
+          throw new ConflictException('El rol ya está dado de baja');
+    }
+
+    const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+    const now = new Date();
+    const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+
+    const roleDeleted = await this.prisma.rol.update({
+      where: { rolId: id },
+      data: { estatus: 'BA', usuarioBaja, fechaBaja: localDate },
+    });
+    const res: ResponseUpdateRoleDto = {
+      rolId: roleDeleted.rolId,
+      tipo: roleDeleted.tipo,
+      usuarioMod: usuarioBaja,
+      fechaMod: roleDeleted.fechaBaja!,
+      estatus: roleDeleted.estatus!,
+    };
+
+    return {
+      status: 200,
+      message: 'Rol dado de baja correctamente',
+      data: [res],
+    };
+  } catch (err) {
+    throw err;
+  }
+}
+
+
 
   }
-
-
-
-}

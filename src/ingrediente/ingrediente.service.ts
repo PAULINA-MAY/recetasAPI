@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { createIngredienteDto } from "./dto/createIngrediente_dto";
+
 import { ApiResponse } from "src/global/response/response";
 
-import { UpdateIngredienteDto } from "./dto/updateIngrediente_dto";
+import { ResponseUpdateIngredienteDto, UpdateIngredienteDto } from "./dto/updateIngrediente_dto";
+import { CreateIngredienteDto } from "./dto/createIngrediente_dto";
 
 
 @Injectable()
@@ -28,6 +29,80 @@ export class IngredienteService {
     }
   }
 
+  async getIngredientesAc(): Promise<ApiResponse<any[]>> {
+    try {
+        const ingredientes = await this.prisma.ingrediente.findMany({
+            where: { estatus: 'AC' },
+            select: {
+                ingredienteId: true,
+                nombre: true,
+                cantidad: true,
+                unidad_medida: true,
+                fechaDeCreacion: true,
+                usuarioAlta: true,
+                usuarioMod: true,
+                fechaMod: true,
+                estatus: true,
+            },
+        });
+
+        if (!ingredientes || ingredientes.length === 0) {
+            return {
+                status: 404,
+                message: 'No se encontraron ingredientes activos',
+                data: [],
+            };
+        }
+
+        return {
+            status: 200,
+            message: 'Ingredientes activos obtenidos correctamente',
+            data: ingredientes,
+        };
+
+    } catch (err) {
+        throw err;
+    }
+}
+
+    async getIngredientesBa(): Promise<ApiResponse<any[]>> {
+    try {
+        const ingredientes = await this.prisma.ingrediente.findMany({
+            where: { estatus: 'BA' },
+            select: {
+                ingredienteId: true,
+                nombre: true,
+                cantidad: true,
+                unidad_medida: true,
+                fechaDeCreacion: true,
+                usuarioAlta: true,
+                usuarioBaja: true,
+                fechaBaja: true,
+                usuarioMod: true,
+                fechaMod: true,
+                estatus: true,
+            },
+        });
+
+        if (!ingredientes || ingredientes.length === 0) {
+            return {
+                status: 404,
+                message: 'No se encontraron ingredientes dados de baja',
+                data: [],
+            };
+        }
+
+        return {
+            status: 200,
+            message: 'Ingredientes dados de baja obtenidos correctamente',
+            data: ingredientes,
+        };
+
+    } catch (err) {
+        throw err;
+    }
+}
+
   async getIngredienteById(ingredienteId: number): Promise<ApiResponse<any>> {
     try {
       const ingrediente = await this.prisma.ingrediente.findUnique({
@@ -47,9 +122,9 @@ export class IngredienteService {
       throw err;
     }
   }
-//solo se le van a agregar los campos de auditoria
+
   async createIngrediente(
-    dto: createIngredienteDto,
+    dto: CreateIngredienteDto,
     recetaId: number,
   ): Promise<ApiResponse<any>> {
     try {
@@ -95,7 +170,7 @@ export class IngredienteService {
   }
 
 
-  //se le va a gregar la arquitectura que se maneja en roles dto y dto response
+
   async updateIngrediente(id: number, dto: UpdateIngredienteDto): Promise<ApiResponse<any>> {
     try {
       const updatedIngrediente = await this.prisma.ingrediente.update({
@@ -112,20 +187,96 @@ export class IngredienteService {
     }
   }
 
-  async deleteIngrediente(id: number): Promise<ApiResponse<any>> {
+async deleteIngrediente(id: number, usuarioMod: string): Promise<ApiResponse< ResponseUpdateIngredienteDto[]>> {
     try {
-      const deletedIngrediente = await this.prisma.ingrediente.delete({
+      const ingrediente = await this.prisma.ingrediente.findUnique({
         where: { ingredienteId: id },
       });
+
+      if(!ingrediente) {
+        throw new NotFoundException('Ingrediente no encontrado');
+      }
+       if(ingrediente.estatus === 'BA') {
+        throw new BadRequestException('El ingrediente ya está dado de baja');
+      }
+
+       const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+    const now = new Date();
+    const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+
+      const deletedIngrediente = await this.prisma.ingrediente.update({
+        where: { ingredienteId: id },
+        data: { estatus: 'BA', usuarioMod: usuarioMod, fechaMod: localDate   },
+      });
+
+      const res: ResponseUpdateIngredienteDto = {
+        ingredienteId: id,
+        nombre: deletedIngrediente.nombre,  
+        cantidad: Number(deletedIngrediente.cantidad),
+       unidad_medida: deletedIngrediente.unidad_medida!,
+        fechaDeCreacion: localDate,
+        fechaMod: localDate,
+        usuarioMod: usuarioMod,
+        estatus: deletedIngrediente.estatus!,
+      };
+
       return {
         status: 200,
-        message: 'Ingrediente eliminado correctamente',
-        data: [deletedIngrediente],
+        message: 'Ingrediente dado de baja correctamente',
+        data: [res],
       }
 
     } catch (err) {
       throw err;
+
     }
-  }
+
+    }
+
+    async activarIngrediente(id: number, usuarioMod: string): Promise<ApiResponse< ResponseUpdateIngredienteDto[]>> {
+    try {
+      const ingrediente = await this.prisma.ingrediente.findUnique({
+        where: { ingredienteId: id },
+      });
+
+      if(!ingrediente) {
+        throw new NotFoundException('Ingrediente no encontrado');
+      }
+       if(ingrediente.estatus === 'BA') {
+        throw new BadRequestException('El ingrediente ya está dado de baja');
+      }
+
+       const MERIDA_OFFSET_MS = -6 * 60 * 60 * 1000;
+    const now = new Date();
+    const localDate = new Date(now.getTime() + MERIDA_OFFSET_MS);
+
+      const deletedIngrediente = await this.prisma.ingrediente.update({
+        where: { ingredienteId: id },
+        data: { estatus: 'AC', usuarioMod: usuarioMod, fechaMod: localDate   },
+      });
+
+      const res: ResponseUpdateIngredienteDto = {
+        ingredienteId: id,
+        nombre: deletedIngrediente.nombre,  
+        cantidad: Number(deletedIngrediente.cantidad),
+       unidad_medida: deletedIngrediente.unidad_medida!,
+        fechaDeCreacion: localDate,
+        fechaMod: localDate,
+        usuarioMod: usuarioMod,
+        estatus: deletedIngrediente.estatus!,
+      };
+      
+      return {
+        status: 200,
+        message: 'Ingrediente activado correctamente',
+        data: [res],
+      }
+
+    } catch (err) {
+      throw err;
+
+    }
+
+    }
 
 }

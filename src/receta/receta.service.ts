@@ -10,6 +10,30 @@ import { CloudinaryService } from "src/cloudinary/cloudinary.service";
 @Injectable()
 export class RecetaService {
   constructor(private prisma: PrismaService, private cloudinaryService: CloudinaryService) { }
+
+
+
+      async getAllRecetas(): Promise<ApiResponse<any>> {
+     try{
+      const recetas = await this.prisma.receta.findMany();
+
+      if (!recetas || recetas.length === 0) {
+        throw new NotFoundException('No se encontraron recetas');
+      } else {
+        return {
+          status: 200,
+          message: 'Recetas obtenidas correctamente',
+          data: recetas,
+        };
+      }
+
+     } catch(err){
+        throw err;
+     }
+
+
+    }
+
 async getRecetasAc(): Promise<ApiResponse<any[]>> {
   try {
     const rol = await this.prisma.receta.findMany({
@@ -143,8 +167,6 @@ async getRecetasByiD(id: number): Promise<ApiResponse<any>> {
     throw err;
   }
 }
-
-
 
 
 async createReceta(
@@ -367,7 +389,7 @@ async activarReceta(
       data: {
         UsuarioMod: usuarioAlta,
         fechaMod: localDate,
-        estatus: 'AC',
+        estatus: receta.estatus!,
       },
     });
 
@@ -393,7 +415,7 @@ async activarReceta(
   } catch (err) {
     throw err;
   }
-}
+} 
 
 async deleteReceta(
   idReceta: number,
@@ -454,6 +476,10 @@ async deleteReceta(
   }
 }
 }
+
+
+
+
 
 
 

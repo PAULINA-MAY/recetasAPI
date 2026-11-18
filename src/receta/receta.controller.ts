@@ -8,6 +8,7 @@ import { ResponseUpdateRecetaDto, UpdateRecetaDto } from "./dto/update_receta_dt
 import { DeleteRecetaDto, ResponseDeleteRecetaDto } from "./dto/delete-receta.dto";
 import { Request } from '@nestjs/common';
 import { FileInterceptor } from "@nestjs/platform-express";
+import { ResponseUpdateRoleDto } from "src/roles/dto/update-role.dto";
 
 @ApiTags('recetas')
 @Controller('recetas')
@@ -16,24 +17,31 @@ import { FileInterceptor } from "@nestjs/platform-express";
 export class RecetaController {
     constructor(private readonly recetaService: RecetaService) { }
 
+                  @Get('All')
+                  @ApiOperation({ summary: 'Obtener todas las recetas' })
+                  @ApiOkResponse({ type: ResponseCreateRecetaDto, description: 'Lista de recetas' })
+                  getRecetas() {
+                      return this.recetaService.getAllRecetas();
+                  }
+
          @Get('Recetas/AC')
-         @ApiOperation({ summary: 'Obtener todos los roles activos' })
+         @ApiOperation({ summary: 'Obtener todas las recetas activas' })
          @ApiOkResponse({ type: [ResponseCreateRecetaDto], description: 'Lista de recetas activas.' })
-         getRolesAc() {
+         getRecetasAc() {
              return this.recetaService.getRecetasAc();
          }
      
              @Get('Recetas/BA')
-         @ApiOperation({ summary: 'Obtener todos los roles inactivos' })
+         @ApiOperation({ summary: 'Obtener todas las recetas inactivas' })
          @ApiOkResponse({ type: [ResponseDeleteRecetaDto], description: 'Lista de recetas inactivas.' })
-         getRolesBa() {
+         getRecetasBa() {
              return this.recetaService.getRecetasBa();
          }
 
-    @Get(':id')
+    @Get(':idReceta')
     @ApiOperation({ summary: 'Obtener una receta por ID' })
     @ApiOkResponse({ type: RecetaDto, description: 'Receta encontrada' })
-    getRecetaById(@Param('id', ParseIntPipe) id: number) {
+    getRecetaById(@Param('idReceta', ParseIntPipe) id: number) {
         return this.recetaService.getRecetasByiD(id);
     }
 
@@ -123,6 +131,8 @@ updateReceta(
 
 
 @Patch(':idReceta/baja')
+  @ApiOperation({ summary: 'Dar de baja una receta por ID' })
+      @ApiOkResponse({ type: ResponseUpdateRoleDto, description: 'La receta ha sido dado de baja.' })
 async deleteReceta(
   @Param('idReceta', ParseIntPipe) idReceta: number,
 @Request() req,
@@ -134,6 +144,8 @@ async deleteReceta(
 }
 
 @Patch(':idReceta/activar')
+  @ApiOperation({ summary: 'Dar de alta una receta por ID' })
+      @ApiOkResponse({ type: ResponseUpdateRoleDto, description: 'La receta ha sido dado de alta.' })
 async activarReceta(
   @Param('idReceta', ParseIntPipe) idReceta: number,
 @Request() req,
